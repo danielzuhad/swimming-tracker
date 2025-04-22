@@ -14,6 +14,6 @@ export type TJarak = "50" | "100" | "200";
 
 export type TGaya = "Dada" | "Bebas" | "Punggung" | "Kupu";
 
-export type TAlat = "Fins" | "Paddle" | "Paddle + Fins";
+export type TAlat = "Fins" | "Paddle" | "Paddle + Fins" | "Snorkel";
 
 export type TInternal = number;

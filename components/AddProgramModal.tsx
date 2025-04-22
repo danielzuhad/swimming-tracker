@@ -2,7 +2,7 @@ import { useSelectOptions } from "@/hooks/useSelectOptions";
 import { TDailyPrograms, TProgramItem } from "@/store/useAgendaStore";
 import { formatCategory } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Modal,
@@ -26,7 +26,7 @@ const programSchema = z.object({
   gaya: z.enum(["Dada", "Bebas", "Punggung", "Kupu"], {
     required_error: "Jarak wajib diisi",
   }),
-  alat: z.enum(["Fins", "Paddle", "Paddle + Fins"]).optional(),
+  alat: z.enum(["Fins", "Paddle", "Paddle + Fins", "Snorkel"]).optional(),
   intervalMenit: z.string().optional(),
   intervalDetik: z.string().optional(),
 });
@@ -61,10 +61,17 @@ export const AddProgramModal: React.FC<Props> = ({
   const { volumeOptions, jarakOptions, gayaOptions, alatOptions } =
     useSelectOptions();
 
+  const [error, setError] = useState<String>("");
+
   const handleFormSubmit = (data: FormValues) => {
     const totalInterval =
       (parseInt(data.intervalMenit || "0") || 0) * 60 +
       (parseInt(data.intervalDetik || "0") || 0);
+
+    if (selectedCategory === "sprint" && totalInterval === 0) {
+      setError("Interval wajib diisi");
+      return;
+    }
 
     onSubmit({
       volume: data.volume,
@@ -121,7 +128,11 @@ export const AddProgramModal: React.FC<Props> = ({
               <RNPickerSelect
                 onValueChange={field.onChange}
                 value={field.value}
-                items={jarakOptions}
+                items={
+                  selectedCategory === "sprint"
+                    ? jarakOptions.filter((opt) => opt.value !== "200")
+                    : jarakOptions
+                }
                 placeholder={{ label: "Pilih Jarak", value: null }}
               />
             )}
@@ -207,6 +218,12 @@ export const AddProgramModal: React.FC<Props> = ({
             <Text style={styles.errorText}>{errors.root.message}</Text>
           )}
 
+          {error && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorBannerText}>{error}</Text>
+            </View>
+          )}
+
           {/* Buttons */}
           <View style={styles.buttonRow}>
             <TouchableOpacity
@@ -237,6 +254,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000aa",
     justifyContent: "center",
     alignItems: "center",
+  },
+  errorBanner: {
+    backgroundColor: "#FFEBEE",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#F44336",
+  },
+  errorBannerText: {
+    color: "#D32F2F",
+    fontSize: 14,
+    lineHeight: 20,
   },
   modalContainer: {
     backgroundColor: "white",

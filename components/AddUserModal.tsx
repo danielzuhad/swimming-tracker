@@ -48,7 +48,7 @@ const AddUserModal = ({
   onClose: () => void;
 }) => {
   const addUser = useUsersStore((state) => state.addUser);
-  const { control, handleSubmit, reset } = useForm<FormData>({
+  const { control, handleSubmit, reset, formState } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -60,13 +60,18 @@ const AddUserModal = ({
   });
 
   const onSubmit = (data: FormData) => {
+    const sanitizeTime = (time: { minutes?: string; seconds?: string }) => ({
+      minutes: time.minutes || "0",
+      seconds: time.seconds || "0",
+    });
+
     addUser({
       id: uuidv4(),
       name: data.name,
-      chestStyle: convertToSeconds(data.chestStyle),
-      backstrokeStyle: convertToSeconds(data.backstrokeStyle),
-      butterflyStyle: convertToSeconds(data.butterflyStyle),
-      freeStyle: convertToSeconds(data.freeStyle),
+      chestStyle: convertToSeconds(sanitizeTime(data.chestStyle)),
+      backstrokeStyle: convertToSeconds(sanitizeTime(data.backstrokeStyle)),
+      butterflyStyle: convertToSeconds(sanitizeTime(data.butterflyStyle)),
+      freeStyle: convertToSeconds(sanitizeTime(data.freeStyle)),
     });
 
     Toast.show({
@@ -100,7 +105,6 @@ const AddUserModal = ({
                   value={value}
                   onChangeText={onChange}
                 />
-                {error && <Text style={styles.errorText}>{error.message}</Text>}
               </>
             )}
           />
@@ -112,47 +116,82 @@ const AddUserModal = ({
                   {styleKey.replace("Style", "").toUpperCase()}
                 </Text>
                 <View style={styles.row}>
-                  <Controller
-                    name={`${styleKey}.minutes` as any}
-                    control={control}
-                    render={({ field: { onChange, value } }) => (
-                      <TextInput
-                        placeholder="Menit"
-                        keyboardType="numeric"
-                        style={{
-                          backgroundColor: "#f1f1f1",
-                          padding: 10,
-                          borderRadius: 8,
-                          fontSize: 16,
-                          flex: 1,
-                        }}
-                        value={value ?? ""}
-                        onChangeText={onChange}
-                      />
-                    )}
-                  />
-                  <Controller
-                    name={`${styleKey}.seconds` as any}
-                    control={control}
-                    render={({ field: { onChange, value } }) => (
-                      <TextInput
-                        placeholder="Detik"
-                        keyboardType="numeric"
-                        style={{
-                          backgroundColor: "#f1f1f1",
-                          padding: 10,
-                          borderRadius: 8,
-                          fontSize: 16,
-                          flex: 1,
-                        }}
-                        value={value ?? ""}
-                        onChangeText={onChange}
-                      />
-                    )}
-                  />
+                  {/* Input Menit */}
+                  <View style={{ flex: 1, marginRight: 5 }}>
+                    <Controller
+                      name={`${styleKey}.minutes` as any}
+                      control={control}
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }) => (
+                        <>
+                          <TextInput
+                            placeholder="Menit"
+                            keyboardType="numeric"
+                            style={[
+                              {
+                                backgroundColor: "#f1f1f1",
+                                padding: 10,
+                                borderRadius: 8,
+                                fontSize: 16,
+                              },
+                              error && { borderColor: "red", borderWidth: 1 },
+                            ]}
+                            value={value?.toString() ?? ""}
+                            onChangeText={onChange}
+                          />
+                          {error && (
+                            <Text style={{ color: "red", fontSize: 12 }}>
+                              {error.message}
+                            </Text>
+                          )}
+                        </>
+                      )}
+                    />
+                  </View>
+
+                  {/* Input Detik */}
+                  <View style={{ flex: 1, marginLeft: 5 }}>
+                    <Controller
+                      name={`${styleKey}.seconds` as any}
+                      control={control}
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }) => (
+                        <>
+                          <TextInput
+                            placeholder="Detik"
+                            keyboardType="numeric"
+                            style={[
+                              {
+                                backgroundColor: "#f1f1f1",
+                                padding: 10,
+                                borderRadius: 8,
+                                fontSize: 16,
+                              },
+                              error && { borderColor: "red", borderWidth: 1 },
+                            ]}
+                            value={value?.toString() ?? ""}
+                            onChangeText={onChange}
+                          />
+                        </>
+                      )}
+                    />
+                  </View>
                 </View>
               </View>
             )
+          )}
+
+          {/* Error Banner */}
+          {Object.keys(formState.errors).length > 0 && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorBannerText}>
+                Harap Lengkapi Pengisian
+              </Text>
+            </View>
           )}
 
           <View style={styles.buttonGroup}>
@@ -232,6 +271,19 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 12,
     marginTop: 4,
+  },
+  errorBanner: {
+    backgroundColor: "#FFEBEE",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#F44336",
+  },
+  errorBannerText: {
+    color: "#D32F2F",
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
 

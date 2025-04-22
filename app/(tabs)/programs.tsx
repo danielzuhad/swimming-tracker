@@ -6,7 +6,7 @@ import {
   TProgramItem,
   useAgendaStore,
 } from "@/store/useAgendaStore";
-import { formatCategory, toMinute } from "@/utils/utils";
+import { formatCategory, today, toMinute } from "@/utils/utils";
 import React, { useState } from "react";
 import {
   ScrollView,
@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 const days: Day[] = [
   "Senin",
@@ -43,6 +44,11 @@ const Programs = () => {
   const [selectedCategory, setSelectedCategory] = useState<
     keyof TDailyPrograms | null
   >(null);
+
+  const dayPrograms = programs[selectedDay];
+  const sprintPrograms = dayPrograms?.sprint ?? [];
+
+  const isSprintFull = sprintPrograms.length >= 2;
 
   const handleOpenModal = (category: keyof TDailyPrograms) => {
     setSelectedCategory(category);
@@ -87,10 +93,27 @@ const Programs = () => {
       {/* Program Item List */}
       {currentDayProgram ? (
         <ScrollView style={{ marginBottom: 20, height: "85%" }}>
+          <Text style={styles.dayTitle}>
+            {selectedDay === today ? `${selectedDay} (Hari ini)` : selectedDay}
+          </Text>
           {Object.entries(currentDayProgram).map(([category, items]) => (
             <TouchableOpacity
               key={category}
-              onPress={() => handleOpenModal(category as keyof TDailyPrograms)}
+              onPress={() => {
+                if (category === "sprint") {
+                  if (!isSprintFull) {
+                    handleOpenModal(category as keyof TDailyPrograms);
+                  } else {
+                    Toast.show({
+                      type: "info",
+                      text1: "Maksimal 2 program sprint.",
+                      position: "bottom",
+                    });
+                  }
+                } else {
+                  handleOpenModal(category as keyof TDailyPrograms);
+                }
+              }}
               style={{
                 backgroundColor: "#fff",
                 padding: 16,
@@ -190,5 +213,12 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontWeight: "bold",
+  },
+  dayTitle: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 12,
+    marginTop: 8,
   },
 });

@@ -26,7 +26,7 @@ export const useSelectOptions = () => {
 
   const alatOptions = useMemo(
     () =>
-      ["Fins", "Paddle", "Paddle + Fins"].map((v) => ({
+      ["Fins", "Paddle", "Paddle + Fins", "Snorkel"].map((v) => ({
         label: v,
         value: v,
       })),
