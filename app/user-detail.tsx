@@ -32,7 +32,9 @@ const UserDetail = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  console.log(trainingRecords[0].program);
+  const allProgramsFilled = Object.values(todayProgram).every(
+    (items) => items.length > 0
+  );
 
   // Fungsi untuk membuka modal
   const openModal = (category: string) => {
@@ -105,43 +107,46 @@ const UserDetail = () => {
 
           {/* Hasil Sprint Hari Ini */}
           <View style={styles.trainingResultContainer}>
-            <Text style={styles.sectionTitle}>
-              {trainingRecords.find((r) => r.date === getTodayKey())
-                ? "Hasil latihan sprint hari ini"
-                : "Anda belum mengisi hasil latihan sprint hari ini"}
-            </Text>
-            {trainingRecords.find((r) => r.date === getTodayKey()) ? (
-              <View style={styles.resultCard}>
+            {!allProgramsFilled ? (
+              <View style={styles.alertBox}>
+                <Text style={styles.alertText}>
+                  ⚠️ Harap lengkapi semua program (Warming, Main, Sprint, Down)
+                  sebelum mencatat hasil latihan sprint.
+                </Text>
+              </View>
+            ) : trainingRecords.find((r) => r.date === getTodayKey()) ? (
+              <View style={styles.resultCardV2}>
                 {(() => {
                   const record = trainingRecords.find(
                     (r) => r.date === getTodayKey()
                   )!;
                   return (
                     <>
-                      <Text style={styles.resultText}>
-                        🏁 50m: {toMinuteFromMili(record.fiftyValue)} menit
+                      <Text style={styles.resultV2TextTitle}>
+                        Hasil Sprint Hari Ini 🏁
                       </Text>
-                      <Text style={styles.resultText}>
-                        🏁 100m: {toMinuteFromMili(record.hundredValue)} menit
+                      <Text style={styles.resultV2Item}>
+                        50m: {toMinuteFromMili(record.fiftyValue)} menit
                       </Text>
-                      <Text style={styles.resultProgramLabel}>
-                        Program Sprint:
+                      <Text style={styles.resultV2Item}>
+                        100m: {toMinuteFromMili(record.hundredValue)} menit
                       </Text>
-                      {record.program && (
-                        <View style={styles.programItem}>
-                          <Text style={styles.programItemText}>•</Text>
-                        </View>
-                      )}
                     </>
                   );
                 })()}
               </View>
             ) : (
               <TouchableOpacity
-                style={styles.addRecordButton}
+                style={[
+                  styles.addRecordButton,
+                  !allProgramsFilled && { opacity: 0.5 },
+                ]}
                 onPress={() => {
-                  router.replace(`/training?userId=${userId}`);
+                  if (allProgramsFilled) {
+                    router.replace(`/training?userId=${userId}`);
+                  }
                 }}
+                disabled={!allProgramsFilled}
               >
                 <Text style={styles.addRecordText}>
                   ➕ Catat Latihan Hari Ini
@@ -406,6 +411,36 @@ const styles = StyleSheet.create({
     color: "#388e3c",
     fontWeight: "600",
     fontSize: 16,
+  },
+  alertBox: {
+    backgroundColor: "#fff3cd",
+    padding: 12,
+    borderRadius: 8,
+    borderColor: "#ffeeba",
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  alertText: {
+    color: "#856404",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  resultCardV2: {
+    backgroundColor: "#e3f2fd",
+    padding: 16,
+    borderRadius: 10,
+    gap: 6,
+  },
+  resultV2TextTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a237e",
+    marginBottom: 6,
+  },
+  resultV2Item: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0d47a1",
   },
 });
 

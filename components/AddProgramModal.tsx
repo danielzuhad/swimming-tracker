@@ -24,10 +24,19 @@ const programSchema = z.object({
   jarak: z.enum(["50", "100", "200"], {
     required_error: "Jarak wajib diisi",
   }),
-  gaya: z.enum(["Dada", "Bebas", "Punggung", "Kupu"], {
+  gaya: z.enum(["Dada", "Bebas", "Punggung", "Kupu", "Gaya Ganti"], {
     required_error: "Jarak wajib diisi",
   }),
-  alat: z.enum(["Fins", "Paddle", "Paddle + Fins", "Snorkel"]).optional(),
+  alat: z
+    .enum([
+      "Fins",
+      "Paddle",
+      "Paddle + Fins",
+      "Snorkel",
+      "Pelampung Besar",
+      "Pelampung Kecil",
+    ])
+    .optional(),
   intervalMenit: z.string().optional(),
   intervalDetik: z.string().optional(),
 });
@@ -69,6 +78,11 @@ export const AddProgramModal: React.FC<Props> = ({
 
   const filledSprintJarak =
     existingSprintItems?.map((item) => item.jarak) ?? [];
+
+  const gayaOptionsUpdated =
+    selectedCategory === "main"
+      ? [...gayaOptions, { label: "Gaya Ganti", value: "Gaya Ganti" }]
+      : gayaOptions;
 
   const availableJarakOptions =
     selectedCategory === "sprint"
@@ -165,7 +179,7 @@ export const AddProgramModal: React.FC<Props> = ({
               <RNPickerSelect
                 onValueChange={field.onChange}
                 value={field.value}
-                items={gayaOptions}
+                items={gayaOptionsUpdated}
                 placeholder={{ label: "Pilih Gaya", value: null }}
               />
             )}

@@ -12,8 +12,14 @@ export type TVolume =
 
 export type TJarak = "50" | "100" | "200";
 
-export type TGaya = "Dada" | "Bebas" | "Punggung" | "Kupu";
+export type TGaya = "Dada" | "Bebas" | "Punggung" | "Kupu" | "Gaya Ganti";
 
-export type TAlat = "Fins" | "Paddle" | "Paddle + Fins" | "Snorkel";
+export type TAlat =
+  | "Fins"
+  | "Paddle"
+  | "Paddle + Fins"
+  | "Snorkel"
+  | "Pelampung Besar"
+  | "Pelampung Kecil";
 
 export type TInternal = number;
