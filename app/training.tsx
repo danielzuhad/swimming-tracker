@@ -3,7 +3,7 @@ import { Colors } from "@/constants/Colors";
 import { useStopwatchStore } from "@/hooks/useStopwatchStore";
 import { useAgendaStore } from "@/store/useAgendaStore";
 import useUsersStore, { ITrainingRecord } from "@/store/useUsersStore";
-import { today } from "@/utils/utils";
+import { getTodayKey, today, toMinuteFromMili } from "@/utils/utils";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -19,37 +19,25 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Training = () => {
   const { userId } = useLocalSearchParams();
   const router = useRouter();
-
   const { users, addTrainingRecord } = useUsersStore();
   const { programs } = useAgendaStore();
+  const { results, resetAll } = useStopwatchStore();
 
   const user = users.find((u) => u.id === userId);
-  const todayProgram = programs[today] || {
-    warming: [],
-    main: [],
-    sprint: [],
-    down: [],
-  };
+  const todayProgram = programs[today] || { sprint: [] };
   const sprints = todayProgram.sprint;
 
   const [selectedStyleIndex, setSelectedStyleIndex] = useState(0);
-  const [results, setResults] = useState<ITrainingRecord[]>([]);
-  const [completedStyles, setCompletedStyles] = useState<string[]>([]);
   const [showSummary, setShowSummary] = useState(false);
 
   const stylesList = Array.from(
     new Set(
       sprints
-        .map((s) => {
-          if (s.gaya && s.volume && s.jarak) {
-            return JSON.stringify({
-              gaya: s.gaya,
-              volume: s.volume,
-              jarak: s.jarak,
-            });
-          }
-          return null;
-        })
+        .map((s) =>
+          s.gaya && s.volume && s.jarak
+            ? JSON.stringify({ gaya: s.gaya, volume: s.volume, jarak: s.jarak })
+            : null
+        )
         .filter((v): v is string => v !== null)
     )
   ).map(
@@ -59,52 +47,41 @@ const Training = () => {
 
   const selected = stylesList[selectedStyleIndex];
 
-  const handleFinish = (
-    laps: { time: number; style: string; volume: string }[]
-  ) => {
-    const records: ITrainingRecord[] = laps.map((lap) => ({
-      date: Date.now(),
-      program: {
-        volume: lap.volume,
-        gaya: lap.style,
-        jarak: null,
-        alat: null,
-        interval: null,
-      },
-      fiftyValue: lap.volume === "50" ? lap.time : 0,
-      hundredValue: lap.volume === "100" ? lap.time : 0,
-    }));
-
-    const label = `${laps[0].volume} x ${laps.length}m ${laps[0].style}`;
-    setResults((prev) => [...prev, ...records]);
-    setCompletedStyles((prev) => [...new Set([...prev, label])]);
-    setShowSummary(true);
-  };
+  const allStylesCompleted = stylesList.every((s) => {
+    const key = `${s.gaya}-${s.volume}-${s.jarak}`;
+    return results[key]?.length > 0;
+  });
 
   const handleSaveResults = () => {
-    const allResults = Object.values(
-      useStopwatchStore.getState().results
-    ).flat();
+    setShowSummary(false);
 
-    const records: ITrainingRecord[] = allResults.map((lap) => ({
-      date: Date.now(),
-      program: {
-        volume: lap.volume,
-        gaya: lap.style,
-        jarak: null,
-        alat: null,
-        interval: null,
-      },
-      fiftyValue: lap.volume === "50" ? lap.time : 0,
-      hundredValue: lap.volume === "100" ? lap.time : 0,
-    }));
+    let fiftyTimes: number[] = [];
+    let hundredTimes: number[] = [];
 
-    records.forEach((r) => addTrainingRecord(String(userId), r));
-    useStopwatchStore.getState().resetAll();
-    router.replace(`/user-detail?${userId}`);
+    // Kumpulkan semua lap dari semua style
+    Object.entries(results).forEach(([key, laps]) => {
+      const [style, volume, jarak] = key.split("-");
+
+      laps.forEach((lap) => {
+        if (jarak === "50") {
+          fiftyTimes.push(lap.time);
+        } else if (jarak === "100") {
+          hundredTimes.push(lap.time);
+        }
+      });
+    });
+
+    const record: ITrainingRecord = {
+      date: getTodayKey(),
+      program: programs[today]!,
+      fiftyValue: fiftyTimes.length ? Math.min(...fiftyTimes) : 0,
+      hundredValue: hundredTimes.length ? Math.min(...hundredTimes) : 0,
+    };
+
+    addTrainingRecord(String(userId), record);
+    resetAll();
+    router.replace(`/user-detail?userId=${userId}`);
   };
-
-  const allStylesCompleted = completedStyles.length === stylesList.length;
 
   if (!user) return <Text>Loading...</Text>;
 
@@ -113,11 +90,13 @@ const Training = () => {
       <Text style={styles.title}>Sprint Training - {user.name}</Text>
 
       <View style={{ flex: 1, justifyContent: "space-between" }}>
-        {/* Style Tabs */}
         <View>
           <View style={styles.tabContainer}>
             {stylesList.map((style, index) => {
               const label = `${style.volume} x ${style.jarak}m ${style.gaya}`;
+              const key = `${style.gaya}-${style.volume}-${style.jarak}`;
+              const isDone = results[key]?.length === style.jarak;
+
               return (
                 <TouchableOpacity
                   key={index}
@@ -126,7 +105,7 @@ const Training = () => {
                     index === selectedStyleIndex && styles.tabActive,
                   ]}
                   onPress={() => setSelectedStyleIndex(index)}
-                  disabled={completedStyles.includes(label)}
+                  disabled={isDone}
                 >
                   <Text
                     style={[
@@ -147,57 +126,97 @@ const Training = () => {
               styleName={selected.gaya}
               volumes={Array(Number(selected.jarak)).fill(selected.volume)}
               tabKey={`${selected.gaya}-${selected.volume}-${selected.jarak}`}
-              onFinish={() => {
-                const label = `${selected.volume} x ${selected.jarak}m ${selected.gaya}`;
-                setCompletedStyles((prev) => [...new Set([...prev, label])]);
-                setShowSummary(true);
-              }}
+              onFinish={() => setShowSummary(true)}
             />
           ) : (
-            <Text style={styles.text}>Tidak ada program sprint hari ini.</Text>
+            <Text>Tidak ada program sprint hari ini.</Text>
           )}
         </View>
 
-        {/* Bottom Buttons */}
         <View style={styles.bottomButtons}>
           <TouchableOpacity
             style={[
               styles.saveButton,
-              {
-                backgroundColor: allStylesCompleted ? "#2196F3" : "#ccc",
-              },
+              { backgroundColor: allStylesCompleted ? "#2196F3" : "#ccc" },
             ]}
             disabled={!allStylesCompleted}
-            onPress={handleSaveResults}
+            onPress={() => setShowSummary(true)}
           >
-            <Text style={styles.saveText}>Simpan</Text>
+            <Text style={styles.saveText}>Selesai</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.backButton]}
-            onPress={() => router.replace(`/user-detail?${userId}`)}
+            style={styles.backButton}
+            onPress={() => router.replace(`/user-detail?userId=${userId}`)}
           >
             <Text style={styles.backText}>Kembali</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Modal */}
+      {/* modal */}
       <Modal visible={showSummary} animationType="slide" transparent>
         <View style={styles.modal}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Hasil Latihan</Text>
-            <ScrollView>
-              {results.map((r, i) => (
-                <View key={i} style={styles.resultItem}>
-                  <Text>{`${r.program.gaya} - ${r.program.volume}m : ${
-                    r.fiftyValue || r.hundredValue
-                  }ms`}</Text>
-                </View>
-              ))}
+            <Text style={styles.modalTitle}>Hasil Sementara</Text>
+
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {Object.entries(results).map(([key, laps], i) => {
+                const [gaya, volume, jarak] = key.split("-");
+                const times = laps.map((l) => l.time);
+                const fastest = Math.min(...times);
+                const slowest = Math.max(...times);
+
+                return (
+                  <View key={i} style={styles.resultCard}>
+                    <View style={styles.resultHeader}>
+                      <Text style={styles.resultGaya}>
+                        {gaya.charAt(0).toUpperCase() + gaya.slice(1)}
+                      </Text>
+                      <Text style={styles.resultInfo}>
+                        {volume} x {jarak}m
+                      </Text>
+                    </View>
+
+                    <View style={styles.lapList}>
+                      {laps.map((lap, j) => (
+                        <Text
+                          key={j}
+                          style={[
+                            styles.lapTime,
+                            {
+                              color:
+                                lap.time === fastest
+                                  ? "#4CAF50"
+                                  : lap.time === slowest
+                                  ? "#F44336"
+                                  : "#212121",
+                            },
+                          ]}
+                        >
+                          • {toMinuteFromMili(lap.time)}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
+                );
+              })}
             </ScrollView>
+
             <TouchableOpacity
-              style={[styles.closeButton]}
+              style={[
+                styles.closeButton,
+                { marginTop: 10, backgroundColor: Colors.light.success },
+              ]}
+              onPress={handleSaveResults}
+            >
+              <Text style={[styles.closeText, { color: "#fff" }]}>
+                Simpan & Kembali
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.closeButton}
               onPress={() => setShowSummary(false)}
             >
               <Text style={styles.closeText}>Tutup</Text>
@@ -208,6 +227,8 @@ const Training = () => {
     </SafeAreaView>
   );
 };
+
+export default Training;
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: Colors.light.background },
@@ -253,13 +274,15 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 14,
-    backgroundColor: "#999",
+    backgroundColor: "#fff",
     borderRadius: 10,
     alignItems: "center",
     color: "#000",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
   },
   backText: {
-    color: "#fff",
+    color: "#000",
     fontWeight: "600",
   },
 
@@ -269,22 +292,55 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
+  modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12 },
+  resultItem: { paddingVertical: 8 },
+  closeButton: {
+    marginTop: 16,
+    backgroundColor: "#fff",
+    color: "#000",
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: "center",
+    borderColor: Colors.light.border,
+  },
+  closeText: { color: "#000", fontWeight: "600" },
+  resultHeader: {
+    flexDirection: "column",
+    // justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  resultGaya: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#333",
+  },
+  resultInfo: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#666",
+  },
+  resultCard: {
+    backgroundColor: "#f9f9f9",
+    padding: 12,
+    borderRadius: 10,
+    marginRight: 12,
+    width: 160, // biar card-nya seragam & enak discroll
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
   modalContent: {
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,
     maxHeight: "80%",
   },
-  modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12 },
-  resultItem: { paddingVertical: 8 },
-  closeButton: {
-    marginTop: 16,
-    backgroundColor: Colors.light.success,
-    padding: 12,
-    borderRadius: 10,
-    alignItems: "center",
+  lapList: {
+    paddingLeft: 8,
+    paddingTop: 4,
   },
-  closeText: { color: "#fff", fontWeight: "600" },
+  lapTime: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
 });
-
-export default Training;

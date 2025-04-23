@@ -2,11 +2,11 @@ import { IUser } from "@/type/user";
 import { zustandStorage } from "@/utils/zustandStorage";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { TProgramItem } from "./useAgendaStore";
+import { TDailyPrograms } from "./useAgendaStore";
 
 export interface ITrainingRecord {
   date: string; // Format: "YYYY-MM-DD"
-  program: TProgramItem; // Program sprint yang dilakukan
+  program: TDailyPrograms; // Program sprint yang dilakukan
   fiftyValue: number;
   hundredValue: number;
 }

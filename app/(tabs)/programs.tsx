@@ -183,6 +183,9 @@ const Programs = () => {
         onSubmit={handleAddProgram}
         selectedDay={selectedDay}
         selectedCategory={selectedCategory as keyof TDailyPrograms}
+        existingSprintItems={
+          selectedCategory === "sprint" ? sprintPrograms : undefined
+        }
       />
     </SafeAreaView>
   );

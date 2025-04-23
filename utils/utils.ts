@@ -12,6 +12,17 @@ export const formatMillis = (millis: number) => {
   return `${minutes}:${seconds}.${ms}`;
 };
 
+export const getTodayKey = () => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+export const toMinuteFromMili = (ms: number) => {
+  const minutes = Math.floor(ms / 60000);
+  const seconds = ((ms % 60000) / 1000).toFixed(2);
+  return `${minutes}:${seconds.padStart(5, "0")}`;
+};
+
 export const toMinute = (seconds: number | null) => {
   if (!seconds || seconds === 0) return "0:00";
 

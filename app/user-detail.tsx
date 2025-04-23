@@ -1,8 +1,14 @@
 import ProgramItemModal from "@/components/ProgramItemModal";
 import { Colors } from "@/constants/Colors";
-import { TProgramItem, useAgendaStore } from "@/store/useAgendaStore";
+import { useAgendaStore } from "@/store/useAgendaStore";
 import useUsersStore from "@/store/useUsersStore";
-import { formatCategory, today, toMinute } from "@/utils/utils";
+import {
+  formatCategory,
+  getTodayKey,
+  today,
+  toMinute,
+  toMinuteFromMili,
+} from "@/utils/utils";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -23,12 +29,10 @@ const UserDetail = () => {
   };
   const trainingRecords = getTrainingRecords(String(userId));
 
-  const [selectedProgram, setSelectedProgram] = useState<TProgramItem | null>(
-    null
-  );
-  const [value, setValue] = useState<string>("");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  console.log(trainingRecords[0].program);
 
   // Fungsi untuk membuka modal
   const openModal = (category: string) => {
@@ -102,21 +106,23 @@ const UserDetail = () => {
           {/* Hasil Sprint Hari Ini */}
           <View style={styles.trainingResultContainer}>
             <Text style={styles.sectionTitle}>
-              {trainingRecords.find((r) => r.date === String(Date.now()))
+              {trainingRecords.find((r) => r.date === getTodayKey())
                 ? "Hasil latihan sprint hari ini"
                 : "Anda belum mengisi hasil latihan sprint hari ini"}
             </Text>
-            {trainingRecords.find((r) => r.date === today) ? (
+            {trainingRecords.find((r) => r.date === getTodayKey()) ? (
               <View style={styles.resultCard}>
                 {(() => {
-                  const record = trainingRecords.find((r) => r.date === today)!;
+                  const record = trainingRecords.find(
+                    (r) => r.date === getTodayKey()
+                  )!;
                   return (
                     <>
                       <Text style={styles.resultText}>
-                        🏁 50m: {toMinute(record.fiftyValue)} menit
+                        🏁 50m: {toMinuteFromMili(record.fiftyValue)} menit
                       </Text>
                       <Text style={styles.resultText}>
-                        🏁 100m: {toMinute(record.hundredValue)} menit
+                        🏁 100m: {toMinuteFromMili(record.hundredValue)} menit
                       </Text>
                       <Text style={styles.resultProgramLabel}>
                         Program Sprint:
@@ -170,14 +176,18 @@ const UserDetail = () => {
             <Text style={styles.buttonText}>📈 Grafik</Text>
           </TouchableOpacity>
 
-          {/* <TouchableOpacity
-            style={[styles.button, styles.backButton]}
+          <TouchableOpacity
+            style={[
+              styles.button,
+              styles.backButton,
+              { borderColor: Colors.light.border },
+            ]}
             onPress={() => router.push("/")}
           >
             <Text style={[styles.buttonText, { color: Colors.light.text }]}>
               🏠 Kembali ke Home
             </Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </View>
 

@@ -112,21 +112,55 @@ export const StopwatchSprint: React.FC<Props> = ({
       <Text style={styles.lapText}>{formatMillis(lapTime)}</Text>
 
       <View style={styles.buttonContainer}>
-        {isRunning ? (
+        {!isRunning ? (
+          laps.length > 0 ? (
+            <>
+              <TouchableOpacity
+                style={styles.stopButton}
+                onPress={() => {
+                  setCurrentTime(0);
+                  setLapTime(0);
+                  setLocalLaps([]);
+                  setLaps(tabKey, []);
+                  startTimeRef.current = null;
+                  lapStartTimeRef.current = null;
+                }}
+              >
+                <Text style={styles.buttonText}>Reset</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.lapButton} onPress={start}>
+                <Text style={styles.buttonText}>Resume</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={styles.stopButton}
+                onPress={() => {
+                  setCurrentTime(0);
+                  setLapTime(0);
+                  setLocalLaps([]);
+                  setLaps(tabKey, []);
+                  startTimeRef.current = null;
+                  lapStartTimeRef.current = null;
+                }}
+              >
+                <Text style={styles.buttonText}>Reset</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.startButton} onPress={start}>
+                <Text style={styles.buttonText}>Start</Text>
+              </TouchableOpacity>
+            </>
+          )
+        ) : (
           <>
-            <TouchableOpacity style={styles.lapButton} onPress={lap}>
-              <Text style={styles.buttonText}>Lap</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.stopButton} onPress={stop}>
               <Text style={styles.buttonText}>Stop</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.lapButton} onPress={lap}>
+              <Text style={styles.buttonText}>Lap</Text>
+            </TouchableOpacity>
           </>
-        ) : (
-          <TouchableOpacity style={styles.startButton} onPress={start}>
-            <Text style={styles.buttonText}>
-              {laps.length > 0 ? "Resume" : "Start"}
-            </Text>
-          </TouchableOpacity>
         )}
       </View>
 

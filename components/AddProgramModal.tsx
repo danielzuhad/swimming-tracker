@@ -1,5 +1,6 @@
 import { useSelectOptions } from "@/hooks/useSelectOptions";
 import { TDailyPrograms, TProgramItem } from "@/store/useAgendaStore";
+import { TJarak } from "@/type/program";
 import { formatCategory } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState } from "react";
@@ -39,13 +40,16 @@ type Props = {
   onSubmit: (item: TProgramItem) => void;
   selectedDay: string;
   selectedCategory: keyof TDailyPrograms;
+  existingSprintItems?: TProgramItem[];
 };
+
 export const AddProgramModal: React.FC<Props> = ({
   visible,
   onClose,
   onSubmit,
   selectedCategory,
   selectedDay,
+  existingSprintItems,
 }) => {
   const {
     register,
@@ -62,6 +66,18 @@ export const AddProgramModal: React.FC<Props> = ({
     useSelectOptions();
 
   const [error, setError] = useState<String>("");
+
+  const filledSprintJarak =
+    existingSprintItems?.map((item) => item.jarak) ?? [];
+
+  const availableJarakOptions =
+    selectedCategory === "sprint"
+      ? jarakOptions.filter(
+          (opt) =>
+            opt.value !== "200" &&
+            !filledSprintJarak.includes(opt.value as TJarak)
+        )
+      : jarakOptions;
 
   const handleFormSubmit = (data: FormValues) => {
     const totalInterval =
@@ -80,6 +96,8 @@ export const AddProgramModal: React.FC<Props> = ({
       alat: data.alat || null,
       interval: totalInterval || null,
     });
+
+    setError("");
 
     Toast.show({
       type: "success",
@@ -128,15 +146,12 @@ export const AddProgramModal: React.FC<Props> = ({
               <RNPickerSelect
                 onValueChange={field.onChange}
                 value={field.value}
-                items={
-                  selectedCategory === "sprint"
-                    ? jarakOptions.filter((opt) => opt.value !== "200")
-                    : jarakOptions
-                }
+                items={availableJarakOptions}
                 placeholder={{ label: "Pilih Jarak", value: null }}
               />
             )}
           />
+
           {errors.jarak && (
             <Text style={styles.errorText}>{errors.jarak.message}</Text>
           )}
@@ -230,6 +245,7 @@ export const AddProgramModal: React.FC<Props> = ({
               style={styles.cancelButton}
               onPress={() => {
                 onClose();
+                setError("");
                 reset();
               }}
             >
