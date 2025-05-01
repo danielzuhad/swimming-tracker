@@ -53,3 +53,75 @@ export const formatCategory = (key: string) => {
       return key;
   }
 };
+
+export function formatDate(dateString: string): string {
+  const months = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  // Pastikan format sesuai dengan standar Date
+  const date = new Date(dateString);
+
+  // Handle jika tanggal tidak valid
+  if (isNaN(date.getTime())) {
+    return "Tanggal tidak valid";
+  }
+
+  // Konversi ke waktu lokal
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+
+  const day = localDate.getDate();
+  const month = months[localDate.getMonth()];
+  const year = localDate.getFullYear();
+
+  return `${day} ${month} ${year}`;
+}
+
+export function formatDateWithTime(dateString: string): string {
+  if (!dateString) {
+    return "-";
+  }
+
+  const months = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  // Parsing Date dengan memastikan format yang benar
+  const date = new Date(dateString);
+
+  // Handle jika tanggal tidak valid
+  if (isNaN(date.getTime())) {
+    return "Tanggal tidak valid";
+  }
+
+  // Gunakan waktu lokal
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  return `${day} ${month} ${year} - ${hours}:${minutes}`;
+}
