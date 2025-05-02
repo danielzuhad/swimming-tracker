@@ -1,6 +1,6 @@
 import { useStopwatchStore } from "@/hooks/useStopwatchStore";
 import { formatMillis } from "@/utils/utils";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -8,19 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-type Lap = {
-  time: number;
-  style: string;
-  volume: string;
-};
-
-type Props = {
-  styleName: string;
-  volumes: string[];
-  tabKey: string; // NEW: unik untuk gaya+volume
-  onFinish?: () => void; // opsional
-};
 
 const Colors = {
   success: "#4CAF50",
@@ -31,11 +18,25 @@ const Colors = {
   lap: "#333333",
 };
 
+type Lap = { time: number; style: string; volume: string };
+type LapData = Lap & { splitTime: number; index: number };
+
+type Props = {
+  styleName: string;
+  volumes: string[];
+  tabKey: string;
+  interval?: number; // dalam detik
+  autoLap?: boolean;
+  onFinish?: () => void;
+};
+
 export const StopwatchSprint: React.FC<Props> = ({
   styleName,
   volumes,
   tabKey,
   onFinish,
+  autoLap,
+  interval,
 }) => {
   const { results, setLaps } = useStopwatchStore();
   const existingLaps = results[tabKey] ?? [];
@@ -44,14 +45,17 @@ export const StopwatchSprint: React.FC<Props> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [lapTime, setLapTime] = useState(0);
   const [laps, setLocalLaps] = useState<Lap[]>(existingLaps);
+  const [autoLapEnabled, setAutoLapEnabled] = useState(autoLap ?? false);
 
+  const autoLapRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timer | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const lapStartTimeRef = useRef<number | null>(null);
+  const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
     setLocalLaps(existingLaps);
-  }, [tabKey]); // update saat pindah tab
+  }, [tabKey]);
 
   const start = () => {
     const now = Date.now();
@@ -62,13 +66,11 @@ export const StopwatchSprint: React.FC<Props> = ({
       startTimeRef.current = now - currentTime;
       lapStartTimeRef.current = now - lapTime;
     }
-
     setIsRunning(true);
-
     timerRef.current = setInterval(() => {
-      const now = Date.now();
-      setCurrentTime(now - (startTimeRef.current ?? now));
-      setLapTime(now - (lapStartTimeRef.current ?? now));
+      const ts = Date.now();
+      setCurrentTime(ts - (startTimeRef.current ?? ts));
+      setLapTime(ts - (lapStartTimeRef.current ?? ts));
     }, 100);
   };
 
@@ -79,35 +81,81 @@ export const StopwatchSprint: React.FC<Props> = ({
 
   const lap = () => {
     if (laps.length >= volumes.length) return;
-
     const now = Date.now();
     const newLapTime = now - (lapStartTimeRef.current ?? now);
     const volume = volumes[laps.length];
-
     const newLaps = [...laps, { time: newLapTime, style: styleName, volume }];
     setLocalLaps(newLaps);
-    setLaps(tabKey, newLaps); // persist ke zustand
-
+    setLaps(tabKey, newLaps);
     if (newLaps.length === volumes.length) {
       stop();
-      onFinish?.(); // jika disediakan, panggil
+      onFinish?.();
     } else {
       lapStartTimeRef.current = now;
       setLapTime(0);
     }
   };
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
+    },
+    []
+  );
 
-  const fastest = Math.min(...laps.map((l) => l.time));
-  const slowest = Math.max(...laps.map((l) => l.time));
+  const lapData: LapData[] = useMemo(() => {
+    return laps.map((l, idx) => {
+      const splitTime = laps
+        .slice(0, idx + 1)
+        .reduce((sum, cur) => sum + cur.time, 0);
+      return { ...l, splitTime, index: idx };
+    });
+  }, [laps]);
+
+  const fastest = laps.length ? Math.min(...laps.map((l) => l.time)) : 0;
+  const slowest = laps.length ? Math.max(...laps.map((l) => l.time)) : 0;
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (lapData.length > 0) {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }
+  }, [lapData]);
+
+  useEffect(() => {
+    if (isRunning && autoLapEnabled && interval) {
+      const intervalInMs = interval * 1000;
+
+      if (currentTime > 0 && currentTime % intervalInMs < 100) {
+        // Reset lapStartTimeRef ke waktu sekarang agar lapTime mulai dari 0 lagi
+        lapStartTimeRef.current = Date.now();
+        setLapTime(0);
+      }
+    }
+  }, [currentTime, isRunning, autoLapEnabled, interval]);
 
   return (
     <View style={styles.container}>
+      <View style={styles.autoLapContainer}>
+        <TouchableOpacity
+          style={[
+            styles.autoLapToggle,
+            autoLapEnabled && styles.autoLapToggleActive,
+          ]}
+          onPress={() => setAutoLapEnabled((prev) => !prev)}
+        >
+          <Text style={styles.autoLapText}>
+            Auto Reset Lap: {autoLapEnabled ? "ON" : "OFF"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <Text style={styles.timerText}>{formatMillis(currentTime)}</Text>
       <Text style={styles.lapText}>{formatMillis(lapTime)}</Text>
 
@@ -164,32 +212,66 @@ export const StopwatchSprint: React.FC<Props> = ({
         )}
       </View>
 
-      <FlatList
-        data={laps}
-        keyExtractor={(_, i) => i.toString()}
-        renderItem={({ item, index }) => {
-          const color =
-            item.time === fastest
-              ? Colors.success
-              : item.time === slowest
-              ? Colors.danger
-              : Colors.text;
-
-          return (
-            <View style={styles.lapItem}>
-              <Text style={{ color }}>
-                {index + 1} - {formatMillis(item.time)}
-              </Text>
-            </View>
-          );
-        }}
-      />
+      {/* Wrapper tambahan untuk area scrollable */}
+      <View style={styles.flatListContainer}>
+        <FlatList
+          ref={flatListRef}
+          data={lapData}
+          keyExtractor={(item) => item.index.toString()}
+          renderItem={({ item }) => {
+            const lapColor =
+              item.time === fastest
+                ? Colors.success
+                : item.time === slowest
+                ? Colors.danger
+                : Colors.text;
+            return (
+              <View style={styles.lapCard}>
+                <View style={styles.lapCardHeader}>
+                  <Text style={styles.lapCardTitle}>Lap {item.index + 1}</Text>
+                  <Text style={[styles.lapCardTitle, { color: lapColor }]}>
+                    {formatMillis(item.time)}
+                  </Text>
+                </View>
+                <View style={styles.lapCardRow}>
+                  <Text style={styles.lapLabel}>Split</Text>
+                  <Text style={styles.lapValue}>
+                    {formatMillis(item.splitTime)}
+                  </Text>
+                </View>
+              </View>
+            );
+          }}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { marginTop: 20, paddingHorizontal: 20 },
+  autoLapContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  autoLapToggle: {
+    backgroundColor: "#ddd",
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  autoLapToggleActive: {
+    backgroundColor: Colors.success,
+  },
+  autoLapText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+
+  flatListContainer: {
+    maxHeight: 280, // Sesuaikan sesuai kebutuhan tinggi maksimal area scroll
+  },
   timerText: {
     fontSize: 48,
     fontWeight: "bold",
@@ -227,13 +309,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 8,
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
+  buttonText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+  lapCard: {
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 2,
+    borderWidth: 1,
+    borderColor: "#EBEBEB",
   },
-  lapItem: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+  lapCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
   },
+  lapCardTitle: { fontSize: 16, fontWeight: "600", color: Colors.text },
+  lapCardRow: { flexDirection: "row", justifyContent: "space-between" },
+  lapLabel: { fontSize: 14, color: "#555555" },
+  lapValue: { fontSize: 14, fontWeight: "500", color: "#111111" },
 });

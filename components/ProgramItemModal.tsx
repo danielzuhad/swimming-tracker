@@ -1,5 +1,5 @@
 import { TProgramItem } from "@/store/useAgendaStore";
-import { formatCategory } from "@/utils/utils";
+import { formatCategory, toMinute } from "@/utils/utils";
 import React from "react";
 import {
   FlatList,
@@ -34,7 +34,7 @@ const ProgramItemModal: React.FC<ProgramItemModalProps> = ({
           Volume: {item.volume || 0} set
         </Text>
         <Text style={styles.programDetailText}>
-          Interval: {item.interval ? ` ${item.interval} menit` : "-"}
+          Interval: {item.interval ? ` ${toMinute(item.interval)} menit` : "-"}
         </Text>
         <Text style={styles.programDetailText}>Alat: {item.alat || "-"}</Text>
       </View>

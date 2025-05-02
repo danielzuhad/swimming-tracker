@@ -3,7 +3,7 @@ import { Colors } from "@/constants/Colors";
 import { useStopwatchStore } from "@/hooks/useStopwatchStore";
 import { useAgendaStore } from "@/store/useAgendaStore";
 import useUsersStore, { ITrainingRecord } from "@/store/useUsersStore";
-import { getTodayKey, today, toMinuteFromMili } from "@/utils/utils";
+import { getTodayKey, today, toMinute, toMinuteFromMili } from "@/utils/utils";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -52,6 +52,14 @@ const Training = () => {
     return results[key]?.length > 0;
   });
 
+  const selectedInterval =
+    sprints.find(
+      (s) =>
+        s.gaya === selected.gaya &&
+        s.volume === selected.volume &&
+        s.jarak === String(selected.jarak) // <- pastikan keduanya string
+    )?.interval || 0;
+
   const handleSaveResults = () => {
     setShowSummary(false);
 
@@ -93,7 +101,19 @@ const Training = () => {
         <View>
           <View style={styles.tabContainer}>
             {stylesList.map((style, index) => {
-              const label = `${style.volume} x ${style.jarak}m ${style.gaya}`;
+              const label = `${style.volume} x ${style.jarak}m ${
+                style.gaya
+              }, Interval ${toMinute(
+                Number(
+                  sprints.find(
+                    (s) =>
+                      s.gaya === style.gaya &&
+                      s.volume === style.volume &&
+                      String(s.jarak) === String(style.jarak)
+                  )?.interval || "-"
+                )
+              )} Menit`;
+
               const key = `${style.gaya}-${style.volume}-${style.jarak}`;
               const isDone = results[key]?.length === style.jarak;
 
@@ -126,6 +146,8 @@ const Training = () => {
               styleName={selected.gaya}
               volumes={Array(Number(selected.jarak)).fill(selected.volume)}
               tabKey={`${selected.gaya}-${selected.volume}-${selected.jarak}`}
+              interval={selectedInterval}
+              autoLap={false} // default awalnya OFF
               onFinish={() => setShowSummary(true)}
             />
           ) : (

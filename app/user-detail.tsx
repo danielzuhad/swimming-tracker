@@ -123,7 +123,7 @@ const UserDetail = () => {
                   return (
                     <>
                       <Text style={styles.resultV2TextTitle}>
-                        Hasil Sprint Hari Ini 🏁
+                        Hasil Sprint Hari Ini 🔥
                       </Text>
                       <Text style={styles.resultV2Item}>
                         50m: {toMinuteFromMili(record.fiftyValue)} menit
@@ -181,7 +181,9 @@ const UserDetail = () => {
 
           <TouchableOpacity
             style={[styles.button, { backgroundColor: "#34a853" }]}
-            onPress={() => {}}
+            onPress={() => {
+              router.push(`/graphic?userId=${userId}`);
+            }}
           >
             <Text style={styles.buttonText}>📈 Grafik</Text>
           </TouchableOpacity>
@@ -359,7 +361,7 @@ const styles = StyleSheet.create({
   // latihan hari ini
   trainingResultContainer: {
     marginBottom: 20,
-    padding: 12,
+    // padding: 12,
     backgroundColor: "#f9f9f9",
     borderRadius: 12,
   },
