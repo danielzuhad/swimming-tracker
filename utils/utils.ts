@@ -17,6 +17,9 @@ export const getTodayKey = () => {
   return today.toISOString().split("T")[0];
 };
 
+export const capitalize = (str: string) =>
+  str.charAt(0).toUpperCase() + str.slice(1);
+
 export const toMinuteFromMili = (ms: number) => {
   const minutes = Math.floor(ms / 60000);
   const seconds = ((ms % 60000) / 1000).toFixed(2);

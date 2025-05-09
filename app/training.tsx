@@ -3,9 +3,15 @@ import { Colors } from "@/constants/Colors";
 import { useStopwatchStore } from "@/hooks/useStopwatchStore";
 import { useAgendaStore } from "@/store/useAgendaStore";
 import useUsersStore, { ITrainingRecord } from "@/store/useUsersStore";
-import { getTodayKey, today, toMinute, toMinuteFromMili } from "@/utils/utils";
+import {
+  capitalize,
+  getTodayKey,
+  today,
+  toMinute,
+  toMinuteFromMili,
+} from "@/utils/utils";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Modal,
   ScrollView,
@@ -30,37 +36,48 @@ const Training = () => {
   const [selectedStyleIndex, setSelectedStyleIndex] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
 
-  const stylesList = Array.from(
-    new Set(
-      sprints
-        .map((s) =>
-          s.gaya && s.volume && s.jarak
-            ? JSON.stringify({ gaya: s.gaya, volume: s.volume, jarak: s.jarak })
-            : null
-        )
-        .filter((v): v is string => v !== null)
-    )
-  ).map(
-    (item) =>
-      JSON.parse(item) as { gaya: string; volume: string; jarak: number }
+  const stylesList = useMemo(() => {
+    return Array.from(
+      new Set(
+        sprints
+          .map((s) =>
+            s.gaya && s.volume && s.jarak
+              ? JSON.stringify({
+                  gaya: s.gaya,
+                  volume: s.volume,
+                  jarak: s.jarak,
+                })
+              : null
+          )
+          .filter((v): v is string => v !== null)
+      )
+    ).map((item) => JSON.parse(item));
+  }, [sprints]);
+
+  const selected = useMemo(
+    () => stylesList[selectedStyleIndex],
+    [stylesList, selectedStyleIndex]
   );
 
-  const selected = stylesList[selectedStyleIndex];
+  const selectedInterval = useMemo(() => {
+    return (
+      sprints.find(
+        (s) =>
+          s.gaya === selected.gaya &&
+          s.volume === selected.volume &&
+          s.jarak === String(selected.jarak)
+      )?.interval || 0
+    );
+  }, [sprints, selected]);
 
-  const allStylesCompleted = stylesList.every((s) => {
-    const key = `${s.gaya}-${s.volume}-${s.jarak}`;
-    return results[key]?.length > 0;
-  });
+  const allStylesCompleted = useMemo(() => {
+    return stylesList.every((s) => {
+      const key = `${s.gaya}-${s.volume}-${s.jarak}`;
+      return results[key]?.length > 0;
+    });
+  }, [stylesList, results]);
 
-  const selectedInterval =
-    sprints.find(
-      (s) =>
-        s.gaya === selected.gaya &&
-        s.volume === selected.volume &&
-        s.jarak === String(selected.jarak) // <- pastikan keduanya string
-    )?.interval || 0;
-
-  const handleSaveResults = () => {
+  const handleSaveResults = useCallback(() => {
     setShowSummary(false);
 
     let fiftyTimes: number[] = [];
@@ -89,7 +106,7 @@ const Training = () => {
     addTrainingRecord(String(userId), record);
     resetAll();
     router.replace(`/user-detail?userId=${userId}`);
-  };
+  }, [results, programs, userId, addTrainingRecord, resetAll, router]);
 
   if (!user) return <Text>Loading...</Text>;
 
@@ -118,24 +135,13 @@ const Training = () => {
               const isDone = results[key]?.length === style.jarak;
 
               return (
-                <TouchableOpacity
+                <StyleTab
                   key={index}
-                  style={[
-                    styles.tab,
-                    index === selectedStyleIndex && styles.tabActive,
-                  ]}
+                  label={label}
+                  active={index === selectedStyleIndex}
                   onPress={() => setSelectedStyleIndex(index)}
                   disabled={isDone}
-                >
-                  <Text
-                    style={[
-                      styles.tabText,
-                      index === selectedStyleIndex && styles.tabTextActive,
-                    ]}
-                  >
-                    {label}
-                  </Text>
-                </TouchableOpacity>
+                />
               );
             })}
           </View>
@@ -192,9 +198,7 @@ const Training = () => {
                 return (
                   <View key={i} style={styles.resultCard}>
                     <View style={styles.resultHeader}>
-                      <Text style={styles.resultGaya}>
-                        {gaya.charAt(0).toUpperCase() + gaya.slice(1)}
-                      </Text>
+                      <Text style={styles.resultGaya}>{capitalize(gaya)}</Text>
                       <Text style={styles.resultInfo}>
                         {volume} x {jarak}m
                       </Text>
@@ -251,6 +255,28 @@ const Training = () => {
 };
 
 export default Training;
+
+const StyleTab = ({
+  label,
+  active,
+  onPress,
+  disabled,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  disabled?: boolean;
+}) => (
+  <TouchableOpacity
+    style={[styles.tab, active && styles.tabActive]}
+    onPress={onPress}
+    disabled={disabled}
+  >
+    <Text style={[styles.tabText, active && styles.tabTextActive]}>
+      {label}
+    </Text>
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: Colors.light.background },

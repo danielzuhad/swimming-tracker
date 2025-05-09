@@ -1,4 +1,5 @@
 import { AddProgramModal } from "@/components/AddProgramModal";
+import { ProgramCard } from "@/components/ProgramCard";
 import { Colors } from "@/constants/Colors";
 import {
   Day,
@@ -6,17 +7,10 @@ import {
   TProgramItem,
   useAgendaStore,
 } from "@/store/useAgendaStore";
-import { formatCategory, today, toMinute } from "@/utils/utils";
-import React, { useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { today } from "@/utils/utils";
+import React, { useCallback, useMemo, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Toast from "react-native-toast-message";
 
 const days: Day[] = [
   "Senin",
@@ -37,29 +31,44 @@ const Programs = () => {
     addProgramItem,
   } = useAgendaStore();
 
-  const currentDayProgram = programs[selectedDay];
-
   const [modalVisible, setModalVisible] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useState<
     keyof TDailyPrograms | null
   >(null);
 
-  const dayPrograms = programs[selectedDay];
-  const sprintPrograms = dayPrograms?.sprint ?? [];
+  const currentDayProgram = useMemo(
+    () => programs[selectedDay],
+    [programs, selectedDay]
+  );
+
+  const sprintPrograms = useMemo(
+    () => currentDayProgram?.sprint ?? [],
+    [currentDayProgram]
+  );
 
   const isSprintFull = sprintPrograms.length >= 2;
 
-  const handleOpenModal = (category: keyof TDailyPrograms) => {
+  const handleOpenModal = useCallback((category: keyof TDailyPrograms) => {
     setSelectedCategory(category);
     setModalVisible(true);
-  };
+  }, []);
 
-  const handleAddProgram = (item: TProgramItem) => {
-    if (selectedCategory) {
-      addProgramItem(selectedDay, selectedCategory, item);
-    }
-  };
+  const handleAddProgram = useCallback(
+    (item: TProgramItem) => {
+      if (selectedCategory) {
+        addProgramItem(selectedDay, selectedCategory, item);
+      }
+    },
+    [addProgramItem, selectedCategory, selectedDay]
+  );
+
+  const handleRemoveItem = useCallback(
+    (category: keyof TDailyPrograms, index: number) => {
+      removeProgramItem(selectedDay, category, index);
+    },
+    [removeProgramItem, selectedDay]
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -97,80 +106,16 @@ const Programs = () => {
             {selectedDay === today ? `${selectedDay} (Hari ini)` : selectedDay}
           </Text>
           {Object.entries(currentDayProgram).map(([category, items]) => (
-            <TouchableOpacity
+            <ProgramCard
               key={category}
-              onPress={() => {
-                if (category === "sprint") {
-                  if (!isSprintFull) {
-                    handleOpenModal(category as keyof TDailyPrograms);
-                  } else {
-                    Toast.show({
-                      type: "info",
-                      text1: "Maksimal 2 program sprint.",
-                      position: "bottom",
-                    });
-                  }
-                } else {
-                  handleOpenModal(category as keyof TDailyPrograms);
-                }
-              }}
-              style={{
-                backgroundColor: "#fff",
-                padding: 16,
-                borderRadius: 12,
-                marginBottom: 5,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.1,
-                shadowRadius: 1,
-                elevation: 2,
-                borderWidth: 1,
-                borderColor: "#ddd",
-              }}
-            >
-              <Text
-                style={{ fontWeight: "bold", fontSize: 16, marginBottom: 8 }}
-              >
-                {formatCategory(category)}
-              </Text>
-
-              {items.length === 0 ? (
-                <Text style={{ color: "#888" }}>Belum ada program</Text>
-              ) : (
-                items.map((item, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      paddingVertical: 8,
-                      borderBottomColor: "#ddd",
-                      borderBottomWidth: index !== items.length - 1 ? 1 : 0,
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text style={{ flex: 1 }}>
-                      {item.volume}x{item.jarak}m {item.gaya || "-"}{" "}
-                      {item.alat
-                        ? `${item.alat && "&"} ${item.alat && item.alat}`
-                        : ""}{" "}
-                      {item.interval && `${toMinute(item.interval)}`}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() =>
-                        removeProgramItem(
-                          selectedDay,
-                          category as keyof typeof currentDayProgram,
-                          index
-                        )
-                      }
-                    >
-                      <Text style={{ color: "red", marginLeft: 8 }}>Hapus</Text>
-                    </TouchableOpacity>
-                  </View>
-                ))
-              )}
-            </TouchableOpacity>
+              category={category as keyof TDailyPrograms}
+              items={items}
+              isSprintFull={isSprintFull}
+              onPress={handleOpenModal}
+              onDelete={(index) =>
+                handleRemoveItem(category as keyof TDailyPrograms, index)
+              }
+            />
           ))}
         </ScrollView>
       ) : (

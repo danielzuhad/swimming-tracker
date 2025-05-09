@@ -3,7 +3,7 @@ import { Colors } from "@/constants/Colors";
 import useUsersStore from "@/store/useUsersStore";
 import { IUser } from "@/type/user";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   GestureResponderEvent,
@@ -23,8 +23,20 @@ export default function HomeScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [search, setSearch] = useState("");
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(search.toLowerCase())
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) =>
+      user.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [users, search]);
+
+  const openModal = useCallback(() => setModalVisible(true), []);
+  const closeModal = useCallback(() => setModalVisible(false), []);
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      removeUserById(id);
+    },
+    [removeUserById]
   );
 
   return (
@@ -49,7 +61,7 @@ export default function HomeScreen() {
         data={filteredUsers}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <Card user={item} onDelete={() => removeUserById(item.id)} />
+          <Card user={item} onDelete={() => handleDelete(item.id)} />
         )}
         ListEmptyComponent={
           <Text style={{ textAlign: "center", marginTop: 20 }}>
@@ -57,19 +69,16 @@ export default function HomeScreen() {
           </Text>
         }
         contentContainerStyle={{ paddingBottom: 20 }}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
       />
 
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setModalVisible(true)}
-      >
+      <TouchableOpacity style={styles.fab} onPress={openModal}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
 
-      <AddUserModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-      />
+      <AddUserModal visible={modalVisible} onClose={closeModal} />
     </SafeAreaView>
   );
 }

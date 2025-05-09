@@ -2,7 +2,7 @@ import { Colors } from "@/constants/Colors";
 import useUsersStore from "@/store/useUsersStore";
 import { convertToSeconds } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Modal,
@@ -15,6 +15,7 @@ import {
 import Toast from "react-native-toast-message";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
+import { TimeInput } from "./TimeInput";
 
 const timeSchema = z
   .object({
@@ -48,6 +49,7 @@ const AddUserModal = ({
   onClose: () => void;
 }) => {
   const addUser = useUsersStore((state) => state.addUser);
+
   const { control, handleSubmit, reset, formState } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,29 +61,37 @@ const AddUserModal = ({
     },
   });
 
-  const onSubmit = (data: FormData) => {
-    const sanitizeTime = (time: { minutes?: string; seconds?: string }) => ({
-      minutes: time.minutes || "0",
-      seconds: time.seconds || "0",
-    });
+  const hasError = useMemo(
+    () => Object.keys(formState.errors).length > 0,
+    [formState.errors]
+  );
 
-    addUser({
-      id: uuidv4(),
-      name: data.name,
-      chestStyle: convertToSeconds(sanitizeTime(data.chestStyle)),
-      backstrokeStyle: convertToSeconds(sanitizeTime(data.backstrokeStyle)),
-      butterflyStyle: convertToSeconds(sanitizeTime(data.butterflyStyle)),
-      freeStyle: convertToSeconds(sanitizeTime(data.freeStyle)),
-    });
+  const sanitizeTime = (time: { minutes?: string; seconds?: string }) => ({
+    minutes: time.minutes || "0",
+    seconds: time.seconds || "0",
+  });
 
-    Toast.show({
-      type: "success",
-      text1: "Murid ditambahkan",
-      position: "bottom",
-    });
-    reset();
-    onClose();
-  };
+  const onSubmit = useCallback(
+    (data: FormData) => {
+      addUser({
+        id: uuidv4(),
+        name: data.name,
+        chestStyle: convertToSeconds(sanitizeTime(data.chestStyle)),
+        backstrokeStyle: convertToSeconds(sanitizeTime(data.backstrokeStyle)),
+        butterflyStyle: convertToSeconds(sanitizeTime(data.butterflyStyle)),
+        freeStyle: convertToSeconds(sanitizeTime(data.freeStyle)),
+      });
+
+      Toast.show({
+        type: "success",
+        text1: "Murid ditambahkan",
+        position: "bottom",
+      });
+      reset();
+      onClose();
+    },
+    [addUser, onClose, reset]
+  );
 
   return (
     <Modal
@@ -110,83 +120,13 @@ const AddUserModal = ({
           />
 
           {["chestStyle", "backstrokeStyle", "butterflyStyle", "freeStyle"].map(
-            (styleKey) => (
-              <View key={styleKey} style={{ marginTop: 10 }}>
-                <Text style={styles.label}>
-                  {styleKey.replace("Style", "").toUpperCase()}
-                </Text>
-                <View style={styles.row}>
-                  {/* Input Menit */}
-                  <View style={{ flex: 1, marginRight: 5 }}>
-                    <Controller
-                      name={`${styleKey}.minutes` as any}
-                      control={control}
-                      render={({
-                        field: { onChange, value },
-                        fieldState: { error },
-                      }) => (
-                        <>
-                          <TextInput
-                            placeholder="Menit"
-                            keyboardType="numeric"
-                            style={[
-                              {
-                                backgroundColor: "#f1f1f1",
-                                padding: 10,
-                                borderRadius: 8,
-                                fontSize: 16,
-                              },
-                              error && { borderColor: "red", borderWidth: 1 },
-                            ]}
-                            value={value?.toString() ?? ""}
-                            onChangeText={onChange}
-                          />
-                          {error && (
-                            <Text style={{ color: "red", fontSize: 12 }}>
-                              {error.message}
-                            </Text>
-                          )}
-                        </>
-                      )}
-                    />
-                  </View>
-
-                  {/* Input Detik */}
-                  <View style={{ flex: 1, marginLeft: 5 }}>
-                    <Controller
-                      name={`${styleKey}.seconds` as any}
-                      control={control}
-                      render={({
-                        field: { onChange, value },
-                        fieldState: { error },
-                      }) => (
-                        <>
-                          <TextInput
-                            placeholder="Detik"
-                            keyboardType="numeric"
-                            style={[
-                              {
-                                backgroundColor: "#f1f1f1",
-                                padding: 10,
-                                borderRadius: 8,
-                                fontSize: 16,
-                              },
-                              error && { borderColor: "red", borderWidth: 1 },
-                            ]}
-                            value={value?.toString() ?? ""}
-                            onChangeText={onChange}
-                          />
-                        </>
-                      )}
-                    />
-                  </View>
-                </View>
-              </View>
+            (style) => (
+              <TimeInput key={style} name={style} control={control} />
             )
           )}
 
           {/* Error Banner */}
-          {Object.keys(formState.errors).length > 0 && (
+          {hasError && (
             <View style={styles.errorBanner}>
               <Text style={styles.errorBannerText}>
                 Harap Lengkapi Pengisian

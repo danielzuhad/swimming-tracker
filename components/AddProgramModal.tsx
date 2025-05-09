@@ -3,7 +3,7 @@ import { TDailyPrograms, TProgramItem } from "@/store/useAgendaStore";
 import { TJarak } from "@/type/program";
 import { formatCategory } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Modal,
@@ -13,9 +13,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
 import Toast from "react-native-toast-message";
 import { z } from "zod";
+import { FormProgram } from "./FormProgram";
 
 const programSchema = z.object({
   volume: z.enum(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], {
@@ -61,8 +61,6 @@ export const AddProgramModal: React.FC<Props> = ({
   existingSprintItems,
 }) => {
   const {
-    register,
-    setValue,
     handleSubmit,
     control,
     formState: { errors },
@@ -76,53 +74,58 @@ export const AddProgramModal: React.FC<Props> = ({
 
   const [error, setError] = useState<String>("");
 
-  const filledSprintJarak =
-    existingSprintItems?.map((item) => item.jarak) ?? [];
+  const filledSprintJarak = useMemo(
+    () => existingSprintItems?.map((item) => item.jarak) ?? [],
+    [existingSprintItems]
+  );
 
-  const gayaOptionsUpdated =
-    selectedCategory === "main"
+  const gayaOptionsUpdated = useMemo(() => {
+    return selectedCategory === "main"
       ? [...gayaOptions, { label: "Gaya Ganti", value: "Gaya Ganti" }]
       : gayaOptions;
+  }, [selectedCategory, gayaOptions]);
 
-  const availableJarakOptions =
-    selectedCategory === "sprint"
+  const availableJarakOptions = useMemo(() => {
+    return selectedCategory === "sprint"
       ? jarakOptions.filter(
           (opt) =>
             opt.value !== "200" &&
             !filledSprintJarak.includes(opt.value as TJarak)
         )
       : jarakOptions;
+  }, [selectedCategory, jarakOptions, filledSprintJarak]);
 
-  const handleFormSubmit = (data: FormValues) => {
-    const totalInterval =
-      (parseInt(data.intervalMenit || "0") || 0) * 60 +
-      (parseInt(data.intervalDetik || "0") || 0);
+  const handleFormSubmit = useCallback(
+    (data: FormValues) => {
+      const totalInterval =
+        (parseInt(data.intervalMenit || "0") || 0) * 60 +
+        (parseInt(data.intervalDetik || "0") || 0);
 
-    if (selectedCategory === "sprint" && totalInterval === 0) {
-      setError("Interval wajib diisi");
-      return;
-    }
+      if (selectedCategory === "sprint" && totalInterval === 0) {
+        setError("Interval wajib diisi");
+        return;
+      }
 
-    onSubmit({
-      volume: data.volume,
-      jarak: data.jarak,
-      gaya: data.gaya,
-      alat: data.alat || null,
-      interval: totalInterval || null,
-    });
+      onSubmit({
+        volume: data.volume,
+        jarak: data.jarak,
+        gaya: data.gaya,
+        alat: data.alat || null,
+        interval: totalInterval || null,
+      });
 
-    setError("");
+      setError("");
+      Toast.show({
+        type: "success",
+        text1: "Program ditambahkan",
+        position: "bottom",
+      });
 
-    Toast.show({
-      type: "success",
-      text1: "Program ditambahkan",
-      position: "bottom",
-    });
-
-    reset();
-
-    onClose();
-  };
+      reset();
+      onClose();
+    },
+    [selectedCategory, onSubmit, onClose, reset]
+  );
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -134,77 +137,44 @@ export const AddProgramModal: React.FC<Props> = ({
           <Text style={styles.title}>Tambah Program </Text>
 
           {/* Volume */}
-          <Text style={styles.label}>Volume</Text>
-          <Controller
-            control={control}
+          <FormProgram<FormValues>
             name="volume"
-            render={({ field }) => (
-              <RNPickerSelect
-                onValueChange={field.onChange}
-                value={field.value}
-                items={volumeOptions}
-                placeholder={{ label: "Pilih Volume", value: null }}
-              />
-            )}
+            control={control}
+            label="Volume"
+            items={volumeOptions}
+            placeholder="Pilih Volume"
+            error={errors.volume?.message}
           />
-          {errors.volume && (
-            <Text style={styles.errorText}>{errors.volume.message}</Text>
-          )}
 
           {/* Jarak */}
-          <Text style={styles.label}>Jarak</Text>
-          <Controller
-            control={control}
+          <FormProgram<FormValues>
             name="jarak"
-            render={({ field }) => (
-              <RNPickerSelect
-                onValueChange={field.onChange}
-                value={field.value}
-                items={availableJarakOptions}
-                placeholder={{ label: "Pilih Jarak", value: null }}
-              />
-            )}
+            control={control}
+            label="Jarak"
+            items={availableJarakOptions}
+            placeholder="Pilih Jarak"
+            error={errors.jarak?.message}
           />
-
-          {errors.jarak && (
-            <Text style={styles.errorText}>{errors.jarak.message}</Text>
-          )}
 
           {/* Gaya */}
-          <Text style={styles.label}>Gaya</Text>
-          <Controller
-            control={control}
+          <FormProgram<FormValues>
             name="gaya"
-            render={({ field }) => (
-              <RNPickerSelect
-                onValueChange={field.onChange}
-                value={field.value}
-                items={gayaOptionsUpdated}
-                placeholder={{ label: "Pilih Gaya", value: null }}
-              />
-            )}
+            control={control}
+            label="Gaya"
+            items={gayaOptionsUpdated}
+            placeholder="Pilih Gaya"
+            error={errors.gaya?.message}
           />
-          {errors.gaya && (
-            <Text style={styles.errorText}>{errors.gaya.message}</Text>
-          )}
 
           {/* Alat */}
-          <Text style={styles.label}>Alat (Opsional)</Text>
-          <Controller
-            control={control}
+          <FormProgram<FormValues>
             name="alat"
-            render={({ field }) => (
-              <RNPickerSelect
-                onValueChange={field.onChange}
-                value={field.value}
-                items={alatOptions}
-                placeholder={{ label: "Pilih Alat", value: null }}
-              />
-            )}
+            control={control}
+            label="Alat (Opsional)"
+            items={alatOptions}
+            placeholder="Pilih Alat"
+            error={errors.alat?.message}
           />
-          {errors.alat && (
-            <Text style={styles.errorText}>{errors.alat.message}</Text>
-          )}
 
           {/* Interval */}
           <Text style={styles.label}>Interval</Text>

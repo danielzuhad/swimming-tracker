@@ -21,18 +21,17 @@ const Graphic = () => {
   const { users, getTrainingRecords } = useUsersStore();
   const router = useRouter();
 
-  const user = users.find((u) => u.id === userId);
-  const trainingRecords = getTrainingRecords(String(userId));
-
-  const [selectedGaya, setSelectedGaya] = useState<string>("");
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [pickerVisible, setPickerVisible] = useState(false);
-  const [pickerTarget, setPickerTarget] = useState<"start" | "end" | null>(
-    null
+  const user = useMemo(
+    () => users.find((u) => u.id === userId),
+    [users, userId]
   );
 
-  console.log({ pickerVisible });
+  const trainingRecords = useMemo(
+    () => getTrainingRecords(String(userId)),
+    [getTrainingRecords, userId]
+  );
+
+  const [selectedGaya, setSelectedGaya] = useState<string>("");
 
   const allGaya = useMemo(() => {
     const gayaSet = new Set<string>();
@@ -46,25 +45,30 @@ const Graphic = () => {
 
   const filteredRecords = useMemo(() => {
     if (!selectedGaya) return [];
-    return trainingRecords
-      .filter((record) =>
-        record.program.sprint.some((s: any) => s.gaya === selectedGaya)
-      )
-      .filter((record) => {
-        const recordDate = new Date(record.date);
-        if (startDate && recordDate < startDate) return false;
-        if (endDate && recordDate > endDate) return false;
-        return true;
-      });
-  }, [selectedGaya, trainingRecords, startDate, endDate]);
+    return trainingRecords.filter((record) =>
+      record.program.sprint.some((s: any) => s.gaya === selectedGaya)
+    );
+  }, [selectedGaya, trainingRecords]);
 
-  const labels = filteredRecords.map((record) => formatDate(record.date));
-  const fiftyDataRaw = filteredRecords.map(
-    (record) => record.fiftyValue / 1000
+  console.log({ filteredRecords });
+
+  const labels = useMemo(
+    () => filteredRecords.map((record) => formatDate(record.date)),
+    [filteredRecords]
   );
-  const hundredDataRaw = filteredRecords.map(
-    (record) => record.hundredValue / 1000
-  );
+
+  const { invertedFifty, invertedHundred } = useMemo(() => {
+    const fifty = filteredRecords.map((record) => record.fiftyValue / 1000);
+    const hundred = filteredRecords.map((record) => record.hundredValue / 1000);
+    const all = [...fifty, ...hundred];
+    const max = Math.max(...all);
+    const min = Math.min(...all);
+
+    return {
+      invertedFifty: fifty.map((val) => max - val + min),
+      invertedHundred: hundred.map((val) => max - val + min),
+    };
+  }, [filteredRecords]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -104,21 +108,21 @@ const Graphic = () => {
                 labels,
                 datasets: [
                   {
-                    data: fiftyDataRaw,
+                    data: invertedFifty,
                     color: () => "#2196F3",
                     strokeWidth: 2,
                   },
                   {
-                    data: hundredDataRaw,
+                    data: invertedHundred,
                     color: () => "#F44336",
                     strokeWidth: 2,
                   },
                 ],
                 legend: ["50m", "100m"],
               }}
-              width={Math.max(screenWidth, labels.length * 80)}
+              width={Math.max(screenWidth, labels.length)}
               height={260}
-              yAxisSuffix="s"
+              yAxisSuffix=" s"
               chartConfig={{
                 backgroundColor: Colors.light.background,
                 backgroundGradientFrom: Colors.light.background,
@@ -135,7 +139,7 @@ const Graphic = () => {
               bezier
               style={{
                 borderRadius: 16,
-                paddingRight: 40,
+                // paddingRight: 40,
               }}
               yAxisInverted={true}
               formatYLabel={(value) => toMinuteFromMili(Number(value) * 1000)}

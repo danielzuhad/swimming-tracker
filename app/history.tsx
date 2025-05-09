@@ -1,8 +1,9 @@
+import { ProgramItemRow } from "@/components/ProgramItemHistory";
 import { TDailyPrograms } from "@/store/useAgendaStore";
 import useUsersStore from "@/store/useUsersStore";
-import { formatDate, toMinuteFromMili } from "@/utils/utils";
+import { capitalize, formatDate, toMinuteFromMili } from "@/utils/utils";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -45,44 +46,38 @@ const History = () => {
       });
   }, [records, dateFilter, maxFifty, maxHundred, sortAsc]);
 
-  const renderItem = ({ item }: { item: (typeof records)[0] }) => (
-    <View style={styles.card}>
-      <Text style={styles.cardDate}>{formatDate(item.date)}</Text>
+  const renderItem = useCallback(
+    ({ item }: { item: (typeof records)[0] }) => (
+      <View style={styles.card}>
+        <Text style={styles.cardDate}>{formatDate(item.date)}</Text>
 
-      {/* Best Time Badges */}
-      <View style={styles.bestTimesContainer}>
-        <View style={styles.bestTimeBadge}>
-          <Text style={styles.bestTimeLabel}>50m</Text>
-          <Text style={styles.bestTimeValue}>
-            {toMinuteFromMili(item.fiftyValue)} Detik
-          </Text>
+        <View style={styles.bestTimesContainer}>
+          <View style={styles.bestTimeBadge}>
+            <Text style={styles.bestTimeLabel}>50m</Text>
+            <Text style={styles.bestTimeValue}>
+              {toMinuteFromMili(item.fiftyValue)} Detik
+            </Text>
+          </View>
+          <View style={styles.bestTimeBadge}>
+            <Text style={styles.bestTimeLabel}>100m</Text>
+            <Text style={styles.bestTimeValue}>
+              {toMinuteFromMili(item.hundredValue)} Detik
+            </Text>
+          </View>
         </View>
-        <View style={styles.bestTimeBadge}>
-          <Text style={styles.bestTimeLabel}>100m</Text>
-          <Text style={styles.bestTimeValue}>
-            {toMinuteFromMili(item.hundredValue)} Detik
-          </Text>
-        </View>
+
+        {sections.map((section) => (
+          <View key={section} style={styles.programSection}>
+            <Text style={styles.sectionTitle}>{capitalize(section)}</Text>
+
+            {item.program[section].map((p, idx) => (
+              <ProgramItemRow key={idx} p={p} />
+            ))}
+          </View>
+        ))}
       </View>
-
-      {/* Program Details */}
-      {sections.map((section) => (
-        <View key={section} style={styles.programSection}>
-          <Text style={styles.sectionTitle}>
-            {section.charAt(0).toUpperCase() + section.slice(1)}
-          </Text>
-          {item.program[section].map((p, idx) => (
-            <View key={idx} style={styles.programRow}>
-              <Text style={styles.programText}>
-                {`${p.volume} x ${p.jarak}m, ${p.gaya}`}
-                {p.alat && `, ${p.alat}`}
-                {p.interval && `, Interval ${p.interval}s`}
-              </Text>
-            </View>
-          ))}
-        </View>
-      ))}
-    </View>
+    ),
+    [records]
   );
 
   return (
@@ -97,20 +92,6 @@ const History = () => {
           value={dateFilter}
           onChangeText={setDateFilter}
         />
-        {/* <TextInput
-          style={styles.input}
-          placeholder="Max 50m time"
-          keyboardType="numeric"
-          value={maxFifty}
-          onChangeText={setMaxFifty}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Max 100m time"
-          keyboardType="numeric"
-          value={maxHundred}
-          onChangeText={setMaxHundred}
-        /> */}
         <TouchableOpacity
           style={styles.sortButton}
           onPress={() => setSortAsc((prev) => !prev)}

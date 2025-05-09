@@ -1,6 +1,12 @@
 import { useStopwatchStore } from "@/hooks/useStopwatchStore";
 import { formatMillis } from "@/utils/utils";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   FlatList,
   StyleSheet,
@@ -47,6 +53,7 @@ export const StopwatchSprint: React.FC<Props> = ({
   const [laps, setLocalLaps] = useState<Lap[]>(existingLaps);
   const [autoLapEnabled, setAutoLapEnabled] = useState(autoLap ?? false);
 
+  const lastAutoLapTrigger = useRef<number>(0);
   const autoLapRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timer | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -96,13 +103,6 @@ export const StopwatchSprint: React.FC<Props> = ({
     }
   };
 
-  useEffect(
-    () => () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    },
-    []
-  );
-
   const lapData: LapData[] = useMemo(() => {
     return laps.map((l, idx) => {
       const splitTime = laps
@@ -112,15 +112,30 @@ export const StopwatchSprint: React.FC<Props> = ({
     });
   }, [laps]);
 
-  const fastest = laps.length ? Math.min(...laps.map((l) => l.time)) : 0;
-  const slowest = laps.length ? Math.max(...laps.map((l) => l.time)) : 0;
-
-  useEffect(
-    () => () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    },
-    []
+  const fastest = useMemo(
+    () => (laps.length ? Math.min(...laps.map((l) => l.time)) : 0),
+    [laps]
   );
+  const slowest = useMemo(
+    () => (laps.length ? Math.max(...laps.map((l) => l.time)) : 0),
+    [laps]
+  );
+
+  const reset = useCallback(() => {
+    setCurrentTime(0);
+    setLapTime(0);
+    setLocalLaps([]);
+    setLaps(tabKey, []);
+    startTimeRef.current = null;
+    lapStartTimeRef.current = null;
+  }, [setLaps, tabKey]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (autoLapRef.current) clearTimeout(autoLapRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (lapData.length > 0) {
@@ -132,10 +147,13 @@ export const StopwatchSprint: React.FC<Props> = ({
     if (isRunning && autoLapEnabled && interval) {
       const intervalInMs = interval * 1000;
 
-      if (currentTime > 0 && currentTime % intervalInMs < 100) {
-        // Reset lapStartTimeRef ke waktu sekarang agar lapTime mulai dari 0 lagi
+      if (
+        currentTime - lastAutoLapTrigger.current >= intervalInMs &&
+        currentTime % intervalInMs < 100
+      ) {
         lapStartTimeRef.current = Date.now();
         setLapTime(0);
+        lastAutoLapTrigger.current = currentTime;
       }
     }
   }, [currentTime, isRunning, autoLapEnabled, interval]);
@@ -163,17 +181,7 @@ export const StopwatchSprint: React.FC<Props> = ({
         {!isRunning ? (
           laps.length > 0 ? (
             <>
-              <TouchableOpacity
-                style={styles.stopButton}
-                onPress={() => {
-                  setCurrentTime(0);
-                  setLapTime(0);
-                  setLocalLaps([]);
-                  setLaps(tabKey, []);
-                  startTimeRef.current = null;
-                  lapStartTimeRef.current = null;
-                }}
-              >
+              <TouchableOpacity style={styles.stopButton} onPress={reset}>
                 <Text style={styles.buttonText}>Reset</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.lapButton} onPress={start}>
@@ -217,7 +225,7 @@ export const StopwatchSprint: React.FC<Props> = ({
         <FlatList
           ref={flatListRef}
           data={lapData}
-          keyExtractor={(item) => item.index.toString()}
+          keyExtractor={(item) => `${tabKey}-${item.index}`}
           renderItem={({ item }) => {
             const lapColor =
               item.time === fastest
