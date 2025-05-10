@@ -1,5 +1,6 @@
 import { StopwatchSprint } from "@/components/stopwatch";
 import { Colors } from "@/constants/Colors";
+import { Typography } from "@/constants/Typhography";
 import { useStopwatchStore } from "@/hooks/useStopwatchStore";
 import { useAgendaStore } from "@/store/useAgendaStore";
 import useUsersStore, { ITrainingRecord } from "@/store/useUsersStore";
@@ -108,7 +109,7 @@ const Training = () => {
     router.replace(`/user-detail?userId=${userId}`);
   }, [results, programs, userId, addTrainingRecord, resetAll, router]);
 
-  if (!user) return <Text>Loading...</Text>;
+  if (!user) return <Text>Tidak ada pengguna.</Text>;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -129,7 +130,7 @@ const Training = () => {
                       String(s.jarak) === String(style.jarak)
                   )?.interval || "-"
                 )
-              )} Menit`;
+              )} `;
 
               const key = `${style.gaya}-${style.volume}-${style.jarak}`;
               const isDone = results[key]?.length === style.jarak;
@@ -280,9 +281,12 @@ const StyleTab = ({
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: Colors.light.background },
-  title: { fontSize: 20, fontWeight: "600", marginBottom: 12 },
-  text: { textAlign: "center", marginTop: 40 },
-
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 4,
+    fontFamily: Typography.semiBold,
+  },
   tabContainer: {
     flexDirection: "row",
     marginBottom: 16,
@@ -290,20 +294,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   tab: {
-    paddingVertical: 8,
+    paddingVertical: 4,
     paddingHorizontal: 16,
     backgroundColor: "#eee",
-    borderRadius: 20,
+    borderRadius: 8,
   },
   tabActive: {
     backgroundColor: Colors.light.success,
   },
   tabText: {
     color: "#000",
+    fontFamily: Typography.regular,
+    paddingBottom: 3,
+    fontSize: 13,
   },
   tabTextActive: {
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily: Typography.semiBold,
+    paddingBottom: 3,
   },
 
   bottomButtons: {
@@ -317,8 +325,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   saveText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: Colors.light.foregroundSecondary,
+    fontFamily: Typography.semiBold,
   },
   backButton: {
     padding: 14,
@@ -327,6 +335,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     color: "#000",
     borderWidth: 1,
+    fontFamily: Typography.semiBold,
     borderColor: Colors.light.border,
   },
   backText: {
@@ -340,9 +349,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
-  modalTitle: { fontSize: 18, fontWeight: "700", marginBottom: 12 },
+  modalTitle: { fontSize: 18, fontFamily: Typography.bold, marginBottom: 12 },
   resultItem: { paddingVertical: 8 },
   closeButton: {
+    fontFamily: Typography.bold,
     marginTop: 16,
     backgroundColor: "#fff",
     color: "#000",
@@ -352,20 +362,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: Colors.light.border,
   },
-  closeText: { color: "#000", fontWeight: "600" },
+  closeText: {
+    color: "#000",
+    fontWeight: "600",
+    fontFamily: Typography.bold,
+    paddingBottom: 3,
+  },
   resultHeader: {
     flexDirection: "column",
     // justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 2,
   },
   resultGaya: {
     fontSize: 16,
-    fontWeight: "700",
     color: "#333",
+    fontFamily: Typography.bold,
   },
   resultInfo: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: Typography.medium,
     color: "#666",
   },
   resultCard: {
@@ -390,5 +405,6 @@ const styles = StyleSheet.create({
   lapTime: {
     fontSize: 14,
     marginBottom: 4,
+    fontFamily: Typography.medium,
   },
 });

@@ -14,11 +14,13 @@ export const Colors = {
     red: "#e74c3c",
     background: "#fff",
     foreground: "#f9f9f9",
+    foregroundSecondary: "#f5f5f5",
     tint: tintColorLight,
     icon: "#687076",
     tabIconDefault: "#687076",
     tabIconSelected: tintColorLight,
     success: "#4AD34F",
+    placeholder: "#999",
   },
   dark: {
     text: "#ECEDEE",

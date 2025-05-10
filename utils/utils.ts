@@ -17,6 +17,17 @@ export const getTodayKey = () => {
   return today.toISOString().split("T")[0];
 };
 
+export function formatStyleLabel(styleKey: string): string {
+  const map: Record<string, string> = {
+    chestStyle: "Dada",
+    backstrokeStyle: "Punggung",
+    butterflyStyle: "Kupu-Kupu",
+    freeStyle: "Bebas",
+  };
+
+  return map[styleKey] || styleKey;
+}
+
 export const capitalize = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1);
 

@@ -1,4 +1,5 @@
-import { capitalize } from "@/utils/utils";
+import { Typography } from "@/constants/Typhography";
+import { formatStyleLabel } from "@/utils/utils";
 import React from "react";
 import { Controller } from "react-hook-form";
 import { StyleSheet, Text, TextInput, View } from "react-native";
@@ -6,7 +7,8 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 export const TimeInput = React.memo(
   ({ name, control }: { name: string; control: any }) => (
     <View style={{ marginTop: 10 }}>
-      <Text style={styles.label}>{capitalize(name.replace("Style", ""))}</Text>
+      <Text style={styles.label}>{formatStyleLabel(name)}</Text>
+
       <View style={styles.row}>
         {/* Menit */}
         <View style={{ flex: 1, marginRight: 5 }}>
@@ -66,6 +68,7 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 6,
     fontWeight: "500",
+    fontFamily: Typography.medium,
   },
   row: {
     flexDirection: "row",

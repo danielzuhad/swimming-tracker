@@ -1,5 +1,6 @@
 import AddUserModal from "@/components/AddUserModal";
 import { Colors } from "@/constants/Colors";
+import { Typography } from "@/constants/Typhography";
 import useUsersStore from "@/store/useUsersStore";
 import { IUser } from "@/type/user";
 import { useRouter } from "expo-router";
@@ -123,21 +124,23 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   headerTitle: {
+    fontFamily: Typography.bold,
     fontSize: 32,
-    fontWeight: "bold",
     color: Colors.light.text,
   },
   subTitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: Colors.light.textSecondary || "#6e6e6e",
     marginTop: 4,
+    fontFamily: Typography.light,
     lineHeight: 22,
   },
   card: {
     backgroundColor: "#fff",
-    padding: 16,
-    marginBottom: 10,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 8,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "#EBEBEB",
   },
@@ -148,7 +151,7 @@ const styles = StyleSheet.create({
   },
   cardName: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: Typography.bold,
     color: "#333",
   },
   cardButton: {
@@ -159,13 +162,15 @@ const styles = StyleSheet.create({
   },
   cardButtonText: {
     color: "white",
-    fontWeight: "600",
+    fontFamily: Typography.bold,
+    paddingBottom: 3,
   },
   searchInput: {
     backgroundColor: "#f1f1f1",
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,
+    fontFamily: Typography.light,
     fontSize: 16,
     marginBottom: 16,
   },

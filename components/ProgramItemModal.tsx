@@ -1,3 +1,4 @@
+import { Typography } from "@/constants/Typhography";
 import { TProgramItem } from "@/store/useAgendaStore";
 import { formatCategory, toMinute } from "@/utils/utils";
 import React from "react";
@@ -99,12 +100,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 4,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 16,
     color: "#1A3C6D",
+    fontFamily: Typography.bold,
   },
   closeButton: {
     padding: 8,
@@ -126,9 +127,9 @@ const styles = StyleSheet.create({
   },
   programMainText: {
     fontSize: 14,
-    fontWeight: "600",
     color: "#1A3C6D",
     marginBottom: 8,
+    fontFamily: Typography.semiBold,
   },
   programDetails: {
     flexDirection: "column",
@@ -137,13 +138,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#555",
     lineHeight: 18,
+    fontFamily: Typography.medium,
   },
   emptyText: {
     fontSize: 12,
-    color: "#999",
-    fontStyle: "italic",
+    fontFamily: Typography.light,
     textAlign: "center",
-    marginTop: 20,
+    marginVertical: 20,
   },
 });
 

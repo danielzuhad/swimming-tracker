@@ -1,4 +1,5 @@
 import { Colors } from "@/constants/Colors";
+import { Typography } from "@/constants/Typhography";
 import useUsersStore from "@/store/useUsersStore";
 import { convertToSeconds } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -142,8 +143,14 @@ const AddUserModal = ({
               <Text style={styles.buttonText}>Simpan</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: "#ccc" }]}
-              onPress={onClose}
+              style={[
+                styles.button,
+                { backgroundColor: Colors.light.foregroundSecondary },
+              ]}
+              onPress={() => {
+                onClose();
+                reset();
+              }}
             >
               <Text style={[styles.buttonText, { color: "#333" }]}>Batal</Text>
             </TouchableOpacity>
@@ -169,7 +176,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: Typography.bold,
     marginBottom: 16,
   },
   input: {
@@ -185,7 +192,7 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 6,
-    fontWeight: "500",
+    fontFamily: Typography.medium,
   },
   row: {
     flexDirection: "row",
@@ -194,7 +201,7 @@ const styles = StyleSheet.create({
   buttonGroup: {
     flexDirection: "column",
     alignItems: "stretch", // biar button-nya w-full
-    marginTop: 24,
+    marginTop: 18,
     gap: 10, // spacing antar tombol
   },
   button: {
@@ -204,7 +211,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily: Typography.bold,
     textAlign: "center",
   },
   errorText: {
@@ -214,15 +221,16 @@ const styles = StyleSheet.create({
   },
   errorBanner: {
     backgroundColor: "#FFEBEE",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 16,
+    padding: 10,
+    borderRadius: 6,
+    marginTop: 20,
     borderLeftWidth: 4,
     borderLeftColor: "#F44336",
   },
   errorBannerText: {
     color: "#D32F2F",
     fontSize: 14,
+    fontFamily: Typography.medium,
     lineHeight: 20,
   },
 });

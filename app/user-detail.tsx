@@ -1,5 +1,6 @@
 import ProgramItemModal from "@/components/ProgramItemModal";
 import { Colors } from "@/constants/Colors";
+import { Typography } from "@/constants/Typhography";
 import { useAgendaStore } from "@/store/useAgendaStore";
 import useUsersStore from "@/store/useUsersStore";
 import {
@@ -11,7 +12,7 @@ import {
 } from "@/utils/utils";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -20,14 +21,21 @@ const UserDetail = () => {
   const { setSelectedDay, programs } = useAgendaStore();
   const { users, getTrainingRecords } = useUsersStore();
   const router = useRouter();
-  const user = users.find((u) => u.id === userId);
+
+  const user = useMemo(
+    () => users.find((u) => u.id === userId),
+    [users, userId]
+  );
   const todayProgram = programs[today] || {
     warming: [],
     main: [],
     sprint: [],
     down: [],
   };
-  const trainingRecords = getTrainingRecords(String(userId));
+  const trainingRecords = useMemo(
+    () => getTrainingRecords(String(userId)),
+    [getTrainingRecords, userId]
+  );
 
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -36,11 +44,10 @@ const UserDetail = () => {
     (items) => items.length > 0
   );
 
-  // Fungsi untuk membuka modal
-  const openModal = (category: string) => {
+  const openModal = useCallback((category: string) => {
     setSelectedCategory(category);
     setModalVisible(true);
-  };
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -54,14 +61,14 @@ const UserDetail = () => {
           <View style={styles.timeBox}>
             <View style={styles.timeRow}>
               <View style={styles.timeItem}>
-                <Text style={styles.timeLabel}>🏊‍♂️ Dada</Text>
+                <Text style={styles.timeLabel}> Dada</Text>
                 <Text style={styles.timeValue}>
                   {user?.chestStyle ? toMinute(user?.chestStyle) : "-"}
                 </Text>
               </View>
 
               <View style={styles.timeItem}>
-                <Text style={styles.timeLabel}>🏊‍♂️ Bebas</Text>
+                <Text style={styles.timeLabel}> Bebas</Text>
                 <Text style={styles.timeValue}>
                   {user?.freeStyle ? toMinute(user?.freeStyle) : "-"}
                 </Text>
@@ -70,7 +77,7 @@ const UserDetail = () => {
 
             <View style={styles.timeRow}>
               <View style={styles.timeItem}>
-                <Text style={styles.timeLabel}>🏊‍♂️ Punggung</Text>
+                <Text style={styles.timeLabel}> Punggung</Text>
                 <Text style={styles.timeValue}>
                   {user?.backstrokeStyle
                     ? toMinute(user?.backstrokeStyle)
@@ -79,7 +86,7 @@ const UserDetail = () => {
               </View>
 
               <View style={styles.timeItem}>
-                <Text style={styles.timeLabel}>🏊‍♂️ Kupu-Kupu</Text>
+                <Text style={styles.timeLabel}> Kupu-Kupu</Text>
                 <Text style={styles.timeValue}>
                   {user?.butterflyStyle ? toMinute(user?.butterflyStyle) : "-"}
                 </Text>
@@ -125,12 +132,18 @@ const UserDetail = () => {
                       <Text style={styles.resultV2TextTitle}>
                         Hasil Sprint Hari Ini 🔥
                       </Text>
-                      <Text style={styles.resultV2Item}>
-                        50m: {toMinuteFromMili(record.fiftyValue)} menit
-                      </Text>
-                      <Text style={styles.resultV2Item}>
-                        100m: {toMinuteFromMili(record.hundredValue)} menit
-                      </Text>
+                      <View style={styles.resultRow}>
+                        <Text style={styles.resultLabel}>50m</Text>
+                        <Text style={styles.resultValue}>
+                          {toMinuteFromMili(record.fiftyValue)} menit
+                        </Text>
+                      </View>
+                      <View style={styles.resultRow}>
+                        <Text style={styles.resultLabel}>100m</Text>
+                        <Text style={styles.resultValue}>
+                          {toMinuteFromMili(record.hundredValue)} menit
+                        </Text>
+                      </View>
                     </>
                   );
                 })()}
@@ -224,77 +237,49 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
-  categoryCard: {
-    width: "48%",
-    backgroundColor: "#FFF",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
+
   header: {
     marginBottom: 12,
   },
   headerTitle: {
-    fontSize: 26,
-    fontWeight: "bold",
+    fontSize: 22,
     color: Colors.light.text,
+    fontFamily: Typography.bold,
   },
   subTitle: {
-    fontSize: 14,
+    fontSize: 12,
+    fontFamily: Typography.light,
     color: Colors.light.textSecondary || "#6e6e6e",
     marginTop: 2,
   },
   buttonGroup: {
-    gap: 16,
-    marginBottom: 50,
+    gap: 10,
+    marginBottom: 30,
   },
   button: {
     backgroundColor: "#1e88e5",
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
   },
   buttonText: {
     color: "white",
     fontWeight: "600",
-    fontSize: 16,
+    fontFamily: Typography.bold,
+    fontSize: 14,
+    paddingBottom: 3,
   },
   backButton: {
-    backgroundColor: Colors.light.background, // Warna berbeda untuk tombol kembali
+    backgroundColor: Colors.light.foregroundSecondary,
     color: Colors.light.text,
     borderWidth: 1,
-    // marginBottom: 70,
+    borderColor: Colors.light.border,
   },
-  categoryContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    // marginBottom: 5,
-  },
-  categoryColumn: {
-    width: "48%",
-    marginBottom: 10,
-  },
-  categoryTitle: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333",
-    marginBottom: 4,
-  },
-  programList: {
-    maxHeight: 100,
-  },
+
   emptyText: {
     fontSize: 10,
     color: "#999",
-    fontStyle: "italic",
+    fontFamily: Typography.light,
   },
   contentWrapper: {
     flex: 1,
@@ -318,10 +303,41 @@ const styles = StyleSheet.create({
     marginTop: 5,
     marginBottom: 5,
   },
+
+  // section program hari ini
+  programList: {
+    maxHeight: 100,
+  },
+  categoryCard: {
+    width: "48%",
+    backgroundColor: "#FFF",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  categoryContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  categoryColumn: {
+    width: "48%",
+    marginBottom: 10,
+  },
+  categoryTitle: {
+    fontSize: 13,
+    fontFamily: Typography.bold,
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
   sectionTitle: {
     fontSize: 12,
-    fontWeight: "600",
     color: "#1A3C6D",
+    fontFamily: Typography.bold,
     marginBottom: 10,
   },
   timeRow: {
@@ -330,10 +346,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
+  // best time
   timeItem: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 12,
+    padding: 10,
     borderRadius: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -345,12 +362,13 @@ const styles = StyleSheet.create({
   timeLabel: {
     fontSize: 12,
     color: "#555",
+    fontFamily: Typography.regular,
   },
 
   timeValue: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 14,
     color: "#000",
+    fontFamily: Typography.bold,
     marginTop: 4,
   },
 
@@ -416,8 +434,9 @@ const styles = StyleSheet.create({
 
   addRecordText: {
     color: "#388e3c",
-    fontWeight: "600",
     fontSize: 16,
+    fontFamily: Typography.bold,
+    paddingBottom: 3,
   },
   alertBox: {
     backgroundColor: "#fff3cd",
@@ -430,24 +449,40 @@ const styles = StyleSheet.create({
   alertText: {
     color: "#856404",
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: Typography.medium,
+    lineHeight: 25,
   },
+
+  // hasil hari ini
   resultCardV2: {
-    backgroundColor: "#e3f2fd",
+    backgroundColor: "#E3F2FD",
     padding: 16,
-    borderRadius: 10,
-    gap: 6,
+    borderRadius: 12,
+    gap: 8,
   },
   resultV2TextTitle: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#1a237e",
-    marginBottom: 6,
+    fontFamily: Typography.bold,
+    color: "#0D47A1",
+    marginBottom: 8,
   },
-  resultV2Item: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#0d47a1",
+
+  resultRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  resultLabel: {
+    fontSize: 14,
+    fontFamily: Typography.medium,
+    color: "#1A237E",
+  },
+
+  resultValue: {
+    fontSize: 14,
+    fontFamily: Typography.semiBold,
+    color: "#0D47A1",
   },
 });
 

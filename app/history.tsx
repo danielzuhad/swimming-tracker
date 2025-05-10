@@ -8,7 +8,6 @@ import {
   FlatList,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -86,12 +85,12 @@ const History = () => {
       <Text style={styles.title}>Riwayat Latihan {user?.name || ""}</Text>
 
       <View style={styles.filters}>
-        <TextInput
+        {/* <TextInput
           style={styles.input}
           placeholder="YYYY-MM-DD"
           value={dateFilter}
           onChangeText={setDateFilter}
-        />
+        /> */}
         <TouchableOpacity
           style={styles.sortButton}
           onPress={() => setSortAsc((prev) => !prev)}
@@ -136,7 +135,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   filters: {
-    marginVertical: 16,
+    marginBottom: 16,
   },
   input: {
     backgroundColor: "#FFFFFF",

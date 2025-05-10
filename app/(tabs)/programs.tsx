@@ -1,6 +1,7 @@
 import { AddProgramModal } from "@/components/AddProgramModal";
 import { ProgramCard } from "@/components/ProgramCard";
 import { Colors } from "@/constants/Colors";
+import { Typography } from "@/constants/Typhography";
 import {
   Day,
   TDailyPrograms,
@@ -147,7 +148,6 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     marginBottom: 12,
-    paddingHorizontal: 10,
   },
   tabButton: {
     paddingVertical: 8,
@@ -160,13 +160,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   tabText: {
-    fontWeight: "bold",
+    fontFamily: Typography.bold,
   },
   dayTitle: {
     fontSize: 24,
-    fontWeight: "600",
     color: "#333",
     marginBottom: 12,
-    marginTop: 8,
+    fontFamily: Typography.bold,
   },
 });

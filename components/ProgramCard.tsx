@@ -1,7 +1,9 @@
+import { Colors } from "@/constants/Colors";
+import { Typography } from "@/constants/Typhography";
 import { TDailyPrograms, TProgramItem } from "@/store/useAgendaStore";
 import { formatCategory, toMinute } from "@/utils/utils";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 
 type ProgramCardProps = {
@@ -33,33 +35,24 @@ export const ProgramCard = React.memo(
     };
 
     return (
-      <TouchableOpacity onPress={handleCardPress} style={cardStyle}>
-        <Text style={{ fontWeight: "bold", fontSize: 16, marginBottom: 8 }}>
-          {formatCategory(category)}
-        </Text>
+      <TouchableOpacity onPress={handleCardPress} style={styles.card}>
+        <Text style={styles.categoryTitle}>{formatCategory(category)}</Text>
 
         {items.length === 0 ? (
-          <Text style={{ color: "#888" }}>Belum ada program</Text>
+          <Text style={styles.emptyText}>Belum ada program</Text>
         ) : (
           items.map((item, index) => (
-            <View
-              key={index}
-              style={{
-                paddingVertical: 8,
-                borderBottomColor: "#ddd",
-                borderBottomWidth: index !== items.length - 1 ? 1 : 0,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ flex: 1 }}>
-                {item.volume}x{item.jarak}m {item.gaya || "-"}{" "}
-                {item.alat ? `& ${item.alat}` : ""}{" "}
-                {item.interval && toMinute(item.interval)}
+            <View key={index} style={styles.itemRow}>
+              {/* <View style={styles.bullet} /> */}
+              <Text style={styles.itemText}>
+                {item.volume} x {item.jarak}m,{" "}
+                <Text style={styles.gayaText}>{item.gaya || "-"}</Text>
+                {item.alat ? ` & ${item.alat}` : ""}
+                {item.interval ? ` ( ${toMinute(item.interval)} )` : ""}
               </Text>
+
               <TouchableOpacity onPress={() => onDelete(index)}>
-                <Text style={{ color: "red", marginLeft: 8 }}>Hapus</Text>
+                <Text style={styles.deleteText}>Hapus</Text>
               </TouchableOpacity>
             </View>
           ))
@@ -69,17 +62,59 @@ export const ProgramCard = React.memo(
   }
 );
 
-// Styles
-const cardStyle = {
-  backgroundColor: "#fff",
-  padding: 16,
-  borderRadius: 12,
-  marginBottom: 5,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.1,
-  shadowRadius: 1,
-  elevation: 2,
-  borderWidth: 1,
-  borderColor: "#ddd",
-};
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#fff",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    shadowColor: "#000",
+  },
+  categoryTitle: {
+    fontFamily: Typography.bold,
+    fontSize: 16,
+    marginBottom: 2,
+    color: "#1A1A1A",
+  },
+  emptyText: {
+    color: "#999",
+    fontFamily: Typography.light,
+    fontSize: 14,
+  },
+  itemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderBottomColor: "#eee",
+    borderBottomWidth: 1,
+  },
+  itemText: {
+    fontFamily: Typography.regular,
+    fontSize: 14,
+    color: "#333",
+    flex: 1,
+  },
+  deleteText: {
+    fontSize: 14,
+    color: "#E53935",
+    fontWeight: "600",
+    marginLeft: 10,
+  },
+  bullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#c2c2c2",
+    marginRight: 8,
+    marginTop: 2,
+  },
+  gayaText: {
+    fontFamily: Typography.medium,
+    fontSize: 14,
+    color: "#333",
+  },
+});

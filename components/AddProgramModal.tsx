@@ -1,3 +1,4 @@
+import { Typography } from "@/constants/Typhography";
 import { useSelectOptions } from "@/hooks/useSelectOptions";
 import { TDailyPrograms, TProgramItem } from "@/store/useAgendaStore";
 import { TJarak } from "@/type/program";
@@ -131,10 +132,10 @@ export const AddProgramModal: React.FC<Props> = ({
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
+          <Text style={styles.title}>Tambah Program </Text>
           <Text style={styles.subtitle}>
             {selectedDay} - {formatCategory(selectedCategory)}
           </Text>
-          <Text style={styles.title}>Tambah Program </Text>
 
           {/* Volume */}
           <FormProgram<FormValues>
@@ -213,10 +214,6 @@ export const AddProgramModal: React.FC<Props> = ({
             </View>
           </View>
 
-          {errors?.root?.message && (
-            <Text style={styles.errorText}>{errors.root.message}</Text>
-          )}
-
           {error && (
             <View style={styles.errorBanner}>
               <Text style={styles.errorBannerText}>{error}</Text>
@@ -233,13 +230,29 @@ export const AddProgramModal: React.FC<Props> = ({
                 reset();
               }}
             >
-              <Text style={{ color: "white" }}>Batal</Text>
+              <Text
+                style={{
+                  color: "white",
+                  fontFamily: Typography.bold,
+                  paddingBottom: 3,
+                }}
+              >
+                Batal
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.saveButton}
               onPress={handleSubmit(handleFormSubmit)}
             >
-              <Text style={{ color: "white" }}>Simpan</Text>
+              <Text
+                style={{
+                  color: "white",
+                  fontFamily: Typography.bold,
+                  paddingBottom: 3,
+                }}
+              >
+                Simpan
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -257,9 +270,10 @@ const styles = StyleSheet.create({
   },
   errorBanner: {
     backgroundColor: "#FFEBEE",
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 4,
+    marginTop: 4,
     borderLeftWidth: 4,
     borderLeftColor: "#F44336",
   },
@@ -267,6 +281,7 @@ const styles = StyleSheet.create({
     color: "#D32F2F",
     fontSize: 14,
     lineHeight: 20,
+    fontFamily: Typography.semiBold,
   },
   modalContainer: {
     backgroundColor: "white",
@@ -275,28 +290,29 @@ const styles = StyleSheet.create({
     width: "85%",
   },
   subtitle: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 12,
     color: "#666",
-    marginBottom: 4,
+    fontFamily: Typography.medium,
+    marginBottom: 1,
     textAlign: "center",
-    marginVertical: 5,
-    paddingBottom: 5,
+    marginVertical: 2,
+    // paddingBottom: 5,
   },
   label: {
     fontSize: 14,
-    fontWeight: "500",
-    marginBottom: 4,
+    marginBottom: 2,
+    fontFamily: Typography.bold,
     marginTop: 12,
   },
   subLabel: {
     fontSize: 12,
     marginBottom: 4,
+    fontFamily: Typography.medium,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
+    fontSize: 16,
+    fontFamily: Typography.bold,
+    textAlign: "center",
   },
   input: {
     borderWidth: 1,
@@ -305,30 +321,26 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 6,
   },
-  errorText: {
-    color: "red",
-    marginBottom: 4,
-    fontSize: 12,
-  },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 16,
+    // justifyContent: "space-between",
+    marginTop: 14,
+    gap: 6,
   },
   cancelButton: {
     backgroundColor: "#aaa",
-    padding: 10,
-    borderRadius: 8,
+    borderRadius: 6,
     flex: 1,
-    marginRight: 8,
     alignItems: "center",
+    paddingVertical: 7,
+    width: "100%",
   },
   saveButton: {
     backgroundColor: "#3498db",
-    padding: 10,
-    borderRadius: 8,
+    borderRadius: 6,
     flex: 1,
-    marginLeft: 8,
     alignItems: "center",
+    paddingVertical: 7,
+    width: "100%",
   },
 });

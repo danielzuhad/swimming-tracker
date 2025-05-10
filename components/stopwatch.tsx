@@ -1,3 +1,4 @@
+import { Typography } from "@/constants/Typhography";
 import { useStopwatchStore } from "@/hooks/useStopwatchStore";
 import { formatMillis } from "@/utils/utils";
 import React, {
@@ -160,23 +161,10 @@ export const StopwatchSprint: React.FC<Props> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.autoLapContainer}>
-        <TouchableOpacity
-          style={[
-            styles.autoLapToggle,
-            autoLapEnabled && styles.autoLapToggleActive,
-          ]}
-          onPress={() => setAutoLapEnabled((prev) => !prev)}
-        >
-          <Text style={styles.autoLapText}>
-            Auto Reset Lap: {autoLapEnabled ? "ON" : "OFF"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       <Text style={styles.timerText}>{formatMillis(currentTime)}</Text>
       <Text style={styles.lapText}>{formatMillis(lapTime)}</Text>
 
+      {/* button */}
       <View style={styles.buttonContainer}>
         {!isRunning ? (
           laps.length > 0 ? (
@@ -220,6 +208,24 @@ export const StopwatchSprint: React.FC<Props> = ({
         )}
       </View>
 
+      <View style={styles.autoLapContainer}>
+        <TouchableOpacity
+          style={[
+            styles.autoLapToggle,
+            autoLapEnabled && styles.autoLapToggleActive,
+            isRunning && styles.autoLapToggleDisabled,
+          ]}
+          onPress={() => {
+            if (!isRunning) setAutoLapEnabled((prev) => !prev);
+          }}
+          disabled={isRunning}
+        >
+          <Text style={styles.autoLapText}>
+            Auto Reset Lap: {autoLapEnabled ? "ON" : "OFF"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Wrapper tambahan untuk area scrollable */}
       <View style={styles.flatListContainer}>
         <FlatList
@@ -257,38 +263,46 @@ export const StopwatchSprint: React.FC<Props> = ({
 };
 
 const styles = StyleSheet.create({
-  container: { marginTop: 20, paddingHorizontal: 20 },
+  container: { marginTop: 5, paddingHorizontal: 20 },
   autoLapContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 12,
   },
   autoLapToggle: {
     backgroundColor: "#ddd",
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 20,
     borderRadius: 20,
+    marginBottom: 14,
   },
   autoLapToggleActive: {
     backgroundColor: Colors.success,
   },
   autoLapText: {
     color: "#fff",
-    fontWeight: "600",
+    fontFamily: Typography.semiBold,
+    paddingBottom: 2,
+    fontSize: 12,
   },
 
   flatListContainer: {
     maxHeight: 280, // Sesuaikan sesuai kebutuhan tinggi maksimal area scroll
+    width: "100%",
   },
+
+  // timer
   timerText: {
     fontSize: 48,
-    fontWeight: "bold",
+    fontFamily: Typography.bold,
     textAlign: "center",
-    marginBottom: 4,
   },
+  autoLapToggleDisabled: {
+    opacity: 0.5,
+  },
+
   lapText: {
     fontSize: 24,
-    fontWeight: "500",
+    fontFamily: Typography.bold,
     textAlign: "center",
     marginBottom: 16,
     color: Colors.lap,
@@ -296,7 +310,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 16,
+    marginBottom: 20,
     gap: 12,
   },
   startButton: {
@@ -317,22 +331,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 8,
   },
-  buttonText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+  buttonText: {
+    color: "#fff",
+    fontFamily: Typography.bold,
+    paddingBottom: 3,
+    fontSize: 16,
+  },
   lapCard: {
     backgroundColor: Colors.background,
     borderRadius: 8,
-    padding: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     marginVertical: 2,
     borderWidth: 1,
     borderColor: "#EBEBEB",
+    width: "100%",
   },
   lapCardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  lapCardTitle: { fontSize: 16, fontWeight: "600", color: Colors.text },
+  lapCardTitle: {
+    fontSize: 14,
+    fontFamily: Typography.semiBold,
+    color: Colors.text,
+  },
   lapCardRow: { flexDirection: "row", justifyContent: "space-between" },
-  lapLabel: { fontSize: 14, color: "#555555" },
-  lapValue: { fontSize: 14, fontWeight: "500", color: "#111111" },
+  lapLabel: { fontSize: 11, color: "#555555", fontFamily: Typography.medium },
+  lapValue: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: "#111111",
+    fontFamily: Typography.medium,
+  },
 });
