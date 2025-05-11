@@ -130,9 +130,9 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 14,
-    color: Colors.light.textSecondary || "#6e6e6e",
+    color: Colors.light.text,
     marginTop: 4,
-    fontFamily: Typography.light,
+    fontFamily: Typography.regular,
     lineHeight: 22,
   },
   card: {
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   cardButton: {
-    backgroundColor: "#e74c3c",
+    backgroundColor: Colors.light.redScodndary,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 6,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     paddingBottom: 3,
   },
   searchInput: {
-    backgroundColor: "#f1f1f1",
+    backgroundColor: Colors.light.foreground,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 30,
     right: 30,
-    backgroundColor: Colors.light.tint,
+    backgroundColor: Colors.light.primary,
     width: 60,
     height: 60,
     borderRadius: 30,

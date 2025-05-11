@@ -145,7 +145,7 @@ const AddUserModal = ({
             <TouchableOpacity
               style={[
                 styles.button,
-                { backgroundColor: Colors.light.foregroundSecondary },
+                { backgroundColor: Colors.light.foreground },
               ]}
               onPress={() => {
                 onClose();
@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontFamily: Typography.bold,
+    color: Colors.light.text,
     marginBottom: 16,
   },
   input: {
@@ -184,6 +185,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     fontSize: 16,
+    color: Colors.light.text,
     //     flex: 1,
   },
   inputError: {
@@ -193,6 +195,7 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 6,
     fontFamily: Typography.medium,
+    color: Colors.light.text,
   },
   row: {
     flexDirection: "row",
@@ -205,7 +208,7 @@ const styles = StyleSheet.create({
     gap: 10, // spacing antar tombol
   },
   button: {
-    backgroundColor: Colors.light.tint,
+    backgroundColor: Colors.light.primary,
     paddingVertical: 12,
     borderRadius: 8,
   },

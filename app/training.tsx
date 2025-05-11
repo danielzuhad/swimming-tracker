@@ -166,7 +166,11 @@ const Training = () => {
           <TouchableOpacity
             style={[
               styles.saveButton,
-              { backgroundColor: allStylesCompleted ? "#2196F3" : "#ccc" },
+              {
+                backgroundColor: allStylesCompleted
+                  ? Colors.light.primary
+                  : "#CCCCCC",
+              },
             ]}
             disabled={!allStylesCompleted}
             onPress={() => setShowSummary(true)}
@@ -233,7 +237,7 @@ const Training = () => {
             <TouchableOpacity
               style={[
                 styles.closeButton,
-                { marginTop: 10, backgroundColor: Colors.light.success },
+                { marginTop: 10, backgroundColor: Colors.light.primary },
               ]}
               onPress={handleSaveResults}
             >
@@ -286,6 +290,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 4,
     fontFamily: Typography.semiBold,
+    color: Colors.light.text,
   },
   tabContainer: {
     flexDirection: "row",
@@ -296,11 +301,11 @@ const styles = StyleSheet.create({
   tab: {
     paddingVertical: 4,
     paddingHorizontal: 16,
-    backgroundColor: "#eee",
+    backgroundColor: Colors.light.foreground,
     borderRadius: 8,
   },
   tabActive: {
-    backgroundColor: Colors.light.success,
+    backgroundColor: "#2B8C45",
   },
   tabText: {
     color: "#000",
@@ -379,7 +384,7 @@ const styles = StyleSheet.create({
     fontFamily: Typography.bold,
   },
   resultInfo: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: Typography.medium,
     color: "#666",
   },

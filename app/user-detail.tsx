@@ -135,13 +135,13 @@ const UserDetail = () => {
                       <View style={styles.resultRow}>
                         <Text style={styles.resultLabel}>50m</Text>
                         <Text style={styles.resultValue}>
-                          {toMinuteFromMili(record.fiftyValue)} menit
+                          {toMinuteFromMili(record.fiftyValue)} Menit
                         </Text>
                       </View>
                       <View style={styles.resultRow}>
                         <Text style={styles.resultLabel}>100m</Text>
                         <Text style={styles.resultValue}>
-                          {toMinuteFromMili(record.hundredValue)} menit
+                          {toMinuteFromMili(record.hundredValue)} Menit
                         </Text>
                       </View>
                     </>
@@ -193,7 +193,7 @@ const UserDetail = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: "#34a853" }]}
+            style={[styles.button, { backgroundColor: "#2B8C45" }]}
             onPress={() => {
               router.push(`/graphic?userId=${userId}`);
             }}
@@ -248,8 +248,8 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 12,
-    fontFamily: Typography.light,
-    color: Colors.light.textSecondary || "#6e6e6e",
+    fontFamily: Typography.regular,
+    color: Colors.light.text,
     marginTop: 2,
   },
   buttonGroup: {
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   button: {
-    backgroundColor: "#1e88e5",
+    backgroundColor: Colors.light.primary,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     paddingBottom: 3,
   },
   backButton: {
-    backgroundColor: Colors.light.foregroundSecondary,
+    backgroundColor: Colors.light.foreground,
     color: Colors.light.text,
     borderWidth: 1,
     borderColor: Colors.light.border,
@@ -286,18 +286,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   programButton: {
-    backgroundColor: "#1976d2", // Biru sporty
-    borderWidth: 1,
-    borderColor: "#1565c0", // Biru tua sebagai aksen
+    backgroundColor: Colors.light.secondary,
   },
   programButtonText: {
     letterSpacing: 0.5,
   },
   timeBox: {
     backgroundColor: "#f9f9f9",
-    padding: 10,
-    borderRadius: 12,
-    gap: 12,
+    borderRadius: 10,
+    gap: 10,
   },
   section: {
     marginTop: 5,
@@ -336,14 +333,14 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    color: "#1A3C6D",
+    color: Colors.light.text,
     fontFamily: Typography.bold,
     marginBottom: 10,
   },
   timeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12,
+    gap: 16,
   },
 
   // best time
@@ -429,11 +426,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#66bb6a",
+    borderColor: Colors.light.green,
   },
 
   addRecordText: {
-    color: "#388e3c",
+    color: Colors.light.green,
     fontSize: 16,
     fontFamily: Typography.bold,
     paddingBottom: 3,
@@ -463,7 +460,7 @@ const styles = StyleSheet.create({
   resultV2TextTitle: {
     fontSize: 16,
     fontFamily: Typography.bold,
-    color: "#0D47A1",
+    color: Colors.light.primary,
     marginBottom: 8,
   },
 
@@ -482,7 +479,7 @@ const styles = StyleSheet.create({
   resultValue: {
     fontSize: 14,
     fontFamily: Typography.semiBold,
-    color: "#0D47A1",
+    color: Colors.light.primary,
   },
 });
 

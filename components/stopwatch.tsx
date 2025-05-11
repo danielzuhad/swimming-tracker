@@ -17,9 +17,9 @@ import {
 } from "react-native";
 
 const Colors = {
-  success: "#4CAF50",
-  danger: "#F44336",
-  primary: "#2196F3",
+  success: "#2B8C45",
+  danger: "#B62616",
+  primary: "#3F72AF",
   text: "#212121",
   background: "#ffffff",
   lap: "#333333",
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   autoLapToggle: {
-    backgroundColor: "#ddd",
+    backgroundColor: "#CCCCCC",
     paddingVertical: 6,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -295,6 +295,7 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontFamily: Typography.bold,
     textAlign: "center",
+    color: Colors.text,
   },
   autoLapToggleDisabled: {
     opacity: 0.5,

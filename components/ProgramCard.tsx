@@ -77,10 +77,10 @@ const styles = StyleSheet.create({
     fontFamily: Typography.bold,
     fontSize: 16,
     marginBottom: 2,
-    color: "#1A1A1A",
+    color: Colors.light.text,
   },
   emptyText: {
-    color: "#999",
+    color: Colors.light.grey,
     fontFamily: Typography.light,
     fontSize: 14,
   },
@@ -95,12 +95,12 @@ const styles = StyleSheet.create({
   itemText: {
     fontFamily: Typography.regular,
     fontSize: 14,
-    color: "#333",
+    color: Colors.light.text,
     flex: 1,
   },
   deleteText: {
     fontSize: 14,
-    color: "#E53935",
+    color: Colors.light.redScodndary,
     fontWeight: "600",
     marginLeft: 10,
   },

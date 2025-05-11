@@ -132,12 +132,12 @@ const Graphic = () => {
                   datasets: [
                     {
                       data: invertedFifty,
-                      color: () => "#2196F3",
+                      color: () => Colors.light.primary,
                       strokeWidth: 2,
                     },
                     {
                       data: invertedHundred,
-                      color: () => "#F44336",
+                      color: () => Colors.light.redScodndary,
                       strokeWidth: 2,
                     },
                   ],
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
   },
   gayaButtonActive: {
-    backgroundColor: Colors.light.success,
+    backgroundColor: Colors.light.green,
   },
   gayaButtonText: {
     color: "#333",
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#007AFF",
+    backgroundColor: Colors.light.primary,
     paddingVertical: 16,
     alignItems: "center",
   },

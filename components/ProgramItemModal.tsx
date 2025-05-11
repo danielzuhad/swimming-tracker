@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import { Typography } from "@/constants/Typhography";
 import { TProgramItem } from "@/store/useAgendaStore";
 import { formatCategory, toMinute } from "@/utils/utils";
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 16,
-    color: "#1A3C6D",
+    color: Colors.light.text,
     fontFamily: Typography.bold,
   },
   closeButton: {
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 20,
-    color: "#555",
+    color: Colors.light.text,
   },
   programList: {
     flexGrow: 0,
@@ -127,7 +128,7 @@ const styles = StyleSheet.create({
   },
   programMainText: {
     fontSize: 14,
-    color: "#1A3C6D",
+    color: Colors.light.text,
     marginBottom: 8,
     fontFamily: Typography.semiBold,
   },

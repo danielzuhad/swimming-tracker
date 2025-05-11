@@ -12,21 +12,37 @@ SplashScreen.preventAutoHideAsync();
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const isLight = colorScheme === "light";
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
+        tabBarActiveTintColor: Colors.light.primary,
+        tabBarInactiveTintColor: Colors.light.grey,
         tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
+          ios: {},
+          android: isLight
+            ? {
+                height: 70,
+                paddingBottom: 6,
+                paddingTop: 6,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                backgroundColor: Colors.light.background,
+                borderTopWidth: 0,
+                elevation: 12,
+                shadowColor: Colors.light.grey,
+              }
+            : {},
         }),
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "500",
+          marginBottom: 4,
+        },
       }}
     >
       <Tabs.Screen
@@ -36,7 +52,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Home color={color} size={24} />,
         }}
       />
-
       <Tabs.Screen
         name="programs"
         options={{

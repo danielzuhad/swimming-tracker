@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import { Typography } from "@/constants/Typhography";
 import { useSelectOptions } from "@/hooks/useSelectOptions";
 import { TDailyPrograms, TProgramItem } from "@/store/useAgendaStore";
@@ -223,24 +224,6 @@ export const AddProgramModal: React.FC<Props> = ({
           {/* Buttons */}
           <View style={styles.buttonRow}>
             <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => {
-                onClose();
-                setError("");
-                reset();
-              }}
-            >
-              <Text
-                style={{
-                  color: "white",
-                  fontFamily: Typography.bold,
-                  paddingBottom: 3,
-                }}
-              >
-                Batal
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
               style={styles.saveButton}
               onPress={handleSubmit(handleFormSubmit)}
             >
@@ -252,6 +235,25 @@ export const AddProgramModal: React.FC<Props> = ({
                 }}
               >
                 Simpan
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => {
+                onClose();
+                setError("");
+                reset();
+              }}
+            >
+              <Text
+                style={{
+                  color: "black", // teks hitam
+                  fontFamily: Typography.bold,
+                  paddingBottom: 3,
+                }}
+              >
+                Batal
               </Text>
             </TouchableOpacity>
           </View>
@@ -313,6 +315,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Typography.bold,
     textAlign: "center",
+    color: Colors.light.text,
   },
   input: {
     borderWidth: 1,
@@ -322,25 +325,22 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   buttonRow: {
-    flexDirection: "row",
-    // justifyContent: "space-between",
+    flexDirection: "column", // vertikal
+    gap: 10, // spasi antar tombol
     marginTop: 14,
-    gap: 6,
   },
   cancelButton: {
-    backgroundColor: "#aaa",
+    backgroundColor: Colors.light.foreground,
     borderRadius: 6,
-    flex: 1,
     alignItems: "center",
-    paddingVertical: 7,
+    paddingVertical: 10,
     width: "100%",
   },
   saveButton: {
-    backgroundColor: "#3498db",
+    backgroundColor: Colors.light.primary,
     borderRadius: 6,
-    flex: 1,
     alignItems: "center",
-    paddingVertical: 7,
+    paddingVertical: 10,
     width: "100%",
   },
 });

@@ -85,13 +85,19 @@ const Programs = () => {
             onPress={() => setSelectedDay(day)}
             style={[
               styles.tabButton,
-              { backgroundColor: selectedDay === day ? "#3498db" : "#eee" },
+              {
+                backgroundColor:
+                  selectedDay === day
+                    ? Colors.light.primary
+                    : Colors.light.foreground,
+              },
             ]}
           >
             <Text
               style={{
                 ...styles.tabText,
-                color: selectedDay === day ? "white" : "#333",
+                color:
+                  selectedDay === day ? Colors.light.white : Colors.light.text,
               }}
             >
               {day}
@@ -161,10 +167,11 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontFamily: Typography.bold,
+    color: Colors.light.text,
   },
   dayTitle: {
     fontSize: 24,
-    color: "#333",
+    color: Colors.light.text,
     marginBottom: 12,
     fontFamily: Typography.bold,
   },

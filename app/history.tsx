@@ -1,4 +1,5 @@
 import { ProgramItemRow } from "@/components/ProgramItemHistory";
+import { Colors } from "@/constants/Colors";
 import { TDailyPrograms } from "@/store/useAgendaStore";
 import useUsersStore from "@/store/useUsersStore";
 import { capitalize, formatDate, toMinuteFromMili } from "@/utils/utils";
@@ -54,13 +55,13 @@ const History = () => {
           <View style={styles.bestTimeBadge}>
             <Text style={styles.bestTimeLabel}>50m</Text>
             <Text style={styles.bestTimeValue}>
-              {toMinuteFromMili(item.fiftyValue)} Detik
+              {toMinuteFromMili(item.fiftyValue)} Menit
             </Text>
           </View>
           <View style={styles.bestTimeBadge}>
             <Text style={styles.bestTimeLabel}>100m</Text>
             <Text style={styles.bestTimeValue}>
-              {toMinuteFromMili(item.hundredValue)} Detik
+              {toMinuteFromMili(item.hundredValue)} Menit
             </Text>
           </View>
         </View>
@@ -124,7 +125,7 @@ export default History;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.light.background,
     paddingHorizontal: 20,
     paddingTop: 20,
   },
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
   },
   sortButton: {
     alignSelf: "flex-start",
-    backgroundColor: "#007AFF",
+    backgroundColor: Colors.light.primary,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     paddingBottom: 100, // space for back button
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.light.white,
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   bestTimeValue: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#002A66",
+    color: Colors.light.primary,
   },
   programSection: {
     marginTop: 12,
@@ -225,7 +226,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#007AFF",
+    backgroundColor: Colors.light.primary,
     paddingVertical: 16,
     alignItems: "center",
   },
