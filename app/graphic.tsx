@@ -124,7 +124,6 @@ const Graphic = () => {
                 }}
                 width={Math.max(screenWidth, labels.length)}
                 onDataPointClick={({ index, value, dataset }) => {
-                  console.log("Point clicked:", { index, value, dataset });
                   setSelectedPoint({ index, value });
                 }}
                 data={{

@@ -32,6 +32,7 @@ const UserDetail = () => {
     sprint: [],
     down: [],
   };
+
   const trainingRecords = useMemo(
     () => getTrainingRecords(String(userId)),
     [getTrainingRecords, userId]

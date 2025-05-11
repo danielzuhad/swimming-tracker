@@ -13,8 +13,10 @@ export const formatMillis = (millis: number) => {
 };
 
 export const getTodayKey = () => {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta", // ✅ fix timezone
+  });
+  return formatter.format(new Date());
 };
 
 export function formatStyleLabel(styleKey: string): string {
@@ -48,6 +50,7 @@ export const toMinute = (seconds: number | null) => {
 
 export const today = new Intl.DateTimeFormat("id-ID", {
   weekday: "long",
+  timeZone: "Asia/Jakarta",
 }).format(new Date()) as Day;
 
 export const convertToSeconds = (t: { minutes?: string; seconds?: string }) =>
